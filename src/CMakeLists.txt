@@ -25,7 +25,7 @@ include_directories("${CMAKE_SOURCE_DIR}/src/vcpkg/installed/arm64-osx/include")
 
 # Исходные файлы
 add_executable(TickerPulseBot
-    "${CMAKE_SOURCE_DIR}/main.cpp "
+    "${CMAKE_SOURCE_DIR}/main.cpp"
     "${CMAKE_SOURCE_DIR}/utils/ThreadPool/ThreadPool.cpp"
 )
 
