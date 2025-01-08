@@ -23,6 +23,7 @@ find_package(OpenSSL REQUIRED)
 include_directories(src)
 include_directories("${CMAKE_SOURCE_DIR}/src/utils")
 include_directories("${CMAKE_SOURCE_DIR}/src/vcpkg/installed/arm64-osx/include")
+include_directories("${CMAKE_SOURCE_DIR}/configs")
 
 # Исходные файлы
 add_executable(TickerPulseBot

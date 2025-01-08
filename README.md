@@ -56,8 +56,12 @@ These dependencies will be automatically installed via **vcpkg** during the setu
      cd src/vcpkg
      ./vcpkg install fmt zlib openssl tgbot
      ```
+5. **Prepare the config directory**:
+   - It is necessary to create the "Configs" directory at the same level as src.
+   - It should contain a configuration file config.h.
+   - To work correctly, they must contain the variables VERSION, API_KEY, CHANNEL_URL.
 
-5. **Configure the Project with CMake**:
+6. **Configure the Project with CMake**:
    - Navigate to the project directory and configure the project:
      ```bash
      cd ticker-pulse-bot
@@ -68,13 +72,13 @@ These dependencies will be automatically installed via **vcpkg** during the setu
 
    - This will configure the project and prepare it for compilation.
 
-6. **Build the Project**:
+7. **Build the Project**:
    - Run `make` to compile the bot:
      ```bash
      make
      ```
 
-7. **Run the Bot**:
+8. **Run the Bot**:
    - After successful compilation, you can run the bot using:
      ```bash
      ./TickerPulseBot

@@ -20,7 +20,7 @@ ThreadPool::ThreadPool(size_t numThreads) : stopFlag(false) {
             }
         });
     }
-}
+};
 
 void ThreadPool::enqueueTask(std::function<void()> task) {
     {
@@ -28,7 +28,7 @@ void ThreadPool::enqueueTask(std::function<void()> task) {
         taskQueue.push(std::move(task));
     }
     cv.notify_one();
-}
+};
 
 void ThreadPool::stop() {
     {
@@ -39,10 +39,10 @@ void ThreadPool::stop() {
     for (std::thread& worker : workers) {
         worker.join();
     }
-}
+};
 
 ThreadPool::~ThreadPool() {
     if (stopFlag) {
         stop();
     }
-}
+};
