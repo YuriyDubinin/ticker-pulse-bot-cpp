@@ -21,14 +21,15 @@ find_package(OpenSSL REQUIRED)
 
 # Заголовочные файлы
 include_directories(src)
+include_directories("${CMAKE_SOURCE_DIR}/src/utils")
 include_directories("${CMAKE_SOURCE_DIR}/src/vcpkg/installed/arm64-osx/include")
 
 # Исходные файлы
 add_executable(TickerPulseBot
     "${CMAKE_SOURCE_DIR}/main.cpp"
     "${CMAKE_SOURCE_DIR}/utils/ThreadPool/ThreadPool.cpp"
+    "${CMAKE_SOURCE_DIR}/utils/Bot/Bot.cpp"
 )
-
 
 # Линк зависимостей с проектом
 target_link_libraries(TickerPulseBot fmt::fmt)
