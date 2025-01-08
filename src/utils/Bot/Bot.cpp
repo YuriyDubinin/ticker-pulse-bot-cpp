@@ -1,4 +1,5 @@
 #include "Bot.h"
+#include "../../../configs/config.h"
 
 // Bot.cpp
 #include "Bot.h"
@@ -11,10 +12,9 @@ void Bot::start() {
     bot.getEvents().onCommand("start", [this](TgBot::Message::Ptr message) {
         onStartCommand(message);
 
-        std::string groupId = "@tickerpulse";
-        std::string testText = "Привет, группа! Это тестовое сообщение.";
+        // std::string testText = "Привет, группа! Это тестовое сообщение.";
 
-        sendToGroup(groupId, testText);
+        // sendToGroup(CHANNEL_URL, testText);
     });
 
     // Обработка любых сообщений
