@@ -1,0 +1,3 @@
+/Users/yuriy/Documents/Projects/Bots/ticker-pulse-bot/build/CMakeFiles/TickerPulseBot.dir
+/Users/yuriy/Documents/Projects/Bots/ticker-pulse-bot/build/CMakeFiles/edit_cache.dir
+/Users/yuriy/Documents/Projects/Bots/ticker-pulse-bot/build/CMakeFiles/rebuild_cache.dir
