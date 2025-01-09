@@ -4,6 +4,7 @@
 #include "global_config.h"
 #include "bot.h"
 #include "crypto_fetcher.h"
+#include "utils.h"
 
 Bot::Bot(const std::string& token, int threadCount)
     : bot(token), pool(threadCount) {};
@@ -91,15 +92,21 @@ void Bot::onCallbackQuery(TgBot::CallbackQuery::Ptr callbackQuery) {
 
         if (!result.empty()) {
             try {
-                fmt::print("JSON объект: {}\n", result.dump(4));
+                double defaultPrice = result[symbol]["usd"];
+                std::string price = utils::toFixedDouble(defaultPrice, 2);    
+                std::string answer = 
+                "BTC: " + price + " $" +
+                "\nETH: " + "12333"
+                ;
+
+                fmt::print("[TICKER_PULSE_BOT]: The price of {} is $ {}\n", symbol, price);
+                bot.getApi().sendMessage(callbackQuery->message->chat->id, answer);
             } catch (const nlohmann::json::exception& e) {
                 fmt::print(stderr, "[TICKER_PULSE_BOT]: Error when retrieving data from JSON: {}\n", e.what());
             }
         } else {
             fmt::print(stderr, "[TICKER_PULSE_BOT]: Error while receiving data\n");
         }
-
-        bot.getApi().sendMessage(callbackQuery->message->chat->id, "Список актуального курса топовых криптовалют: \n");
     } else if (callbackQuery->data == "SELECT_CURRENCY") {
         bot.getApi().sendMessage(callbackQuery->message->chat->id, "Вызов меню выбора криптовалюты");
     } else if (callbackQuery->data == "ATIONS") {

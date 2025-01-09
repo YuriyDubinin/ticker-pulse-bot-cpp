@@ -85,6 +85,7 @@
         "vector": "cpp",
         "algorithm": "cpp",
         "functional": "cpp",
-        "*.ipp": "cpp"
+        "*.ipp": "cpp",
+        "csetjmp": "cpp"
     }
 }
