@@ -2,19 +2,18 @@
 #define CRYPTO_FETCHER
 
 #include <string>
-#include <memory>
-#include <thread>
-#include <future>
-#include "thread_pool.h"
+#include <curl/curl.h>
+#include <nlohmann/json.hpp>
 
 class CryptoFetcher {
     public:
-        explicit CryptoFetcher(ThreadPool& pool) : pool_(pool) {};
-        ~CryptoFetcher() = default;
+        explicit CryptoFetcher();
+        ~CryptoFetcher();
 
-        void fetchCoinGecko(const std::string& symbol);
-    private:
-        ThreadPool& pool_;
+        nlohmann::json fetchCoinGecko(const std::string& symbol);
+    
+private:
+    static size_t writeCallback(void* contents, size_t size, size_t nmemb, void* userp);
 };
 
 #endif

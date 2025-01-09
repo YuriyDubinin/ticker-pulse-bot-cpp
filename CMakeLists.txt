@@ -19,7 +19,7 @@ find_package(fmt REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(nlohmann_json REQUIRED)
-# find_package(CURL REQUIRED)
+find_package(CURL REQUIRED)
 
 # Заголовочные файлы
 include_directories(src)
@@ -34,6 +34,7 @@ add_executable(TickerPulseBot
     "${CMAKE_SOURCE_DIR}/src/main.cpp"
     "${CMAKE_SOURCE_DIR}/src/thread_pool.cpp"
     "${CMAKE_SOURCE_DIR}/src/bot.cpp"
+    "${CMAKE_SOURCE_DIR}/src/crypto_fetcher.cpp"
 )
 
 # Линк зависимостей с проектом
@@ -41,4 +42,5 @@ target_link_libraries(TickerPulseBot fmt::fmt)
 target_link_libraries(TickerPulseBot ZLIB::ZLIB)
 target_link_libraries(TickerPulseBot OpenSSL::SSL OpenSSL::Crypto)
 target_link_libraries(TickerPulseBot nlohmann_json::nlohmann_json)
+target_link_libraries(TickerPulseBot CURL::libcurl)
 target_link_libraries(TickerPulseBot "${CMAKE_SOURCE_DIR}/vcpkg/installed/arm64-osx/lib/libTgBot.a")

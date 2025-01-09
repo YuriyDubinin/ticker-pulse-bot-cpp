@@ -2,7 +2,7 @@
 #include "global_config.h"
 
 int main() {
-    fmt::print("[TICKER-PULSE-BOT]: started, version: {}\n", VERSION);
+    fmt::print("[TICKER_PULSE_BOT]: started, version: {}\n", VERSION);
 
     Bot bot(API_KEY, 2);
 

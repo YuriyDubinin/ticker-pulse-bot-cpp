@@ -1,7 +1,9 @@
 #include <string>
+#include <fmt/core.h>
 #include "bot.h"
 #include "global_config.h"
 #include "bot.h"
+#include "crypto_fetcher.h"
 
 Bot::Bot(const std::string& token, int threadCount)
     : bot(token), pool(threadCount) {};
@@ -24,16 +26,16 @@ void Bot::start() {
 
     try {
         // Печать имени бота
-        fmt::print("[TICKER-PULSE-BOT]: TG username - {}\n", bot.getApi().getMe()->username);
+        fmt::print("[TICKER_PULSE_BOT]: TG username - {}\n", bot.getApi().getMe()->username);
 
         // Запуск Long Polling
         TgBot::TgLongPoll longPoll(bot);
         while (true) {
-            fmt::print("[TICKER-PULSE-BOT]: Long poll started\n");
+            fmt::print("[TICKER_PULSE_BOT]: Long poll started\n");
             longPoll.start();
         }
     } catch (TgBot::TgException& e) {
-        fmt::print("[TICKER-PULSE-BOT]: {}\n", e.what());
+        fmt::print("[TICKER_PULSE_BOT]: {}\n", e.what());
     }
 };
 
@@ -75,14 +77,28 @@ void Bot::onAnyMessage(TgBot::Message::Ptr message) {
 void Bot::sendToGroup(const std::string& groupId, const std::string& messageText) {
     try {
         bot.getApi().sendMessage(groupId, messageText);
-        fmt::print("[TICKER-PULSE-BOT]: Message sent to group {}\n", groupId);
+        fmt::print("[TICKER_PULSE_BOT]: Message sent to group {}\n", groupId);
     } catch (TgBot::TgException& e) {
-        fmt::print("[TICKER-PULSE-BOT]: Failed to send message to group {}: {}\n", groupId, e.what());
+        fmt::print("[TICKER_PULSE_BOT]: Failed to send message to group {}: {}\n", groupId, e.what());
     }
 };
 
 void Bot::onCallbackQuery(TgBot::CallbackQuery::Ptr callbackQuery) {
     if (callbackQuery->data == "ACTUAL") { 
+        CryptoFetcher fetcher;
+        const std::string symbol = "bitcoin";
+        nlohmann::json result = fetcher.fetchCoinGecko(symbol);
+
+        if (!result.empty()) {
+            try {
+                fmt::print("JSON объект: {}\n", result.dump(4));
+            } catch (const nlohmann::json::exception& e) {
+                fmt::print(stderr, "[TICKER_PULSE_BOT]: Error when retrieving data from JSON: {}\n", e.what());
+            }
+        } else {
+            fmt::print(stderr, "[TICKER_PULSE_BOT]: Error while receiving data\n");
+        }
+
         bot.getApi().sendMessage(callbackQuery->message->chat->id, "Список актуального курса топовых криптовалют: \n");
     } else if (callbackQuery->data == "SELECT_CURRENCY") {
         bot.getApi().sendMessage(callbackQuery->message->chat->id, "Вызов меню выбора криптовалюты");
