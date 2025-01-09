@@ -1,3 +1,4 @@
+#include <string>
 #include "bot.h"
 #include "global_config.h"
 #include "bot.h"

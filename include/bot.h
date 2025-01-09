@@ -3,7 +3,9 @@
 
 #include <tgbot/tgbot.h>
 #include <fmt/core.h>
+#include <string>
 #include "thread_pool.h"
+
 
 class Bot {
     public:

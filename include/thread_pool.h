@@ -10,19 +10,19 @@
 #include <functional>
 
 class ThreadPool {
-public:
-    explicit ThreadPool(size_t numThreads);
-    ~ThreadPool();
-    
-    void enqueueTask(std::function<void()> task);
-    void stop();
+    public:
+        explicit ThreadPool(size_t numThreads);
+        ~ThreadPool();
+        
+        void enqueueTask(std::function<void()> task);
+        void stop();
 
-private:
-    std::vector<std::thread> workers;
-    std::queue<std::function<void()>> taskQueue;
-    std::mutex queueMutex;
-    std::condition_variable cv;
-    std::atomic<bool> stopFlag;
+    private:
+        std::vector<std::thread> workers;
+        std::queue<std::function<void()>> taskQueue;
+        std::mutex queueMutex;
+        std::condition_variable cv;
+        std::atomic<bool> stopFlag;
 };
 
 #endif
