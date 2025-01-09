@@ -5,16 +5,12 @@
 #include "Bot.h"
 
 Bot::Bot(const std::string& token, int threadCount)
-    : bot(token), pool(threadCount) {}
+    : bot(token), pool(threadCount) {};
 
 void Bot::start() {
     // Обработка команды /start
     bot.getEvents().onCommand("start", [this](TgBot::Message::Ptr message) {
         onStartCommand(message);
-
-        // std::string testText = "Привет, группа! Это тестовое сообщение.";
-
-        // sendToGroup(CHANNEL_URL, testText);
     });
 
     // Обработка любых сообщений
@@ -87,8 +83,8 @@ void Bot::sendToGroup(const std::string& groupId, const std::string& messageText
 };
 
 void Bot::onCallbackQuery(TgBot::CallbackQuery::Ptr callbackQuery) {
-    if (callbackQuery->data == "ACTUAL") {
-        bot.getApi().sendMessage(callbackQuery->message->chat->id, "Список актуального курса топовых криптовалют");
+    if (callbackQuery->data == "ACTUAL") { 
+        bot.getApi().sendMessage(callbackQuery->message->chat->id, "Список актуального курса топовых криптовалют: \n");
     } else if (callbackQuery->data == "SELECT_CURRENCY") {
         bot.getApi().sendMessage(callbackQuery->message->chat->id, "Вызов меню выбора криптовалюты");
     } else if (callbackQuery->data == "ATIONS") {

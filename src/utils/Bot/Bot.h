@@ -3,7 +3,6 @@
 
 #include <tgbot/tgbot.h>
 #include <fmt/core.h>
-#include <string>
 #include "../ThreadPool/ThreadPool.h"
 
 class Bot {

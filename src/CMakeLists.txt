@@ -18,6 +18,8 @@ list(APPEND CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/vcpkg/installed/arm64-osx/sha
 find_package(fmt REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(OpenSSL REQUIRED)
+find_package(nlohmann_json REQUIRED)
+# find_package(CURL REQUIRED)
 
 # Заголовочные файлы
 include_directories(src)
@@ -36,4 +38,5 @@ add_executable(TickerPulseBot
 target_link_libraries(TickerPulseBot fmt::fmt)
 target_link_libraries(TickerPulseBot ZLIB::ZLIB)
 target_link_libraries(TickerPulseBot OpenSSL::SSL OpenSSL::Crypto)
+target_link_libraries(TickerPulseBot nlohmann_json::nlohmann_json)
 target_link_libraries(TickerPulseBot "${CMAKE_SOURCE_DIR}/vcpkg/installed/arm64-osx/lib/libTgBot.a")
