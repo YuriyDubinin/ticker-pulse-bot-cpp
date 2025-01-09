@@ -1,8 +1,6 @@
-#include "Bot.h"
-#include "../../../configs/config.h"
-
-// Bot.cpp
-#include "Bot.h"
+#include "bot.h"
+#include "global_config.h"
+#include "bot.h"
 
 Bot::Bot(const std::string& token, int threadCount)
     : bot(token), pool(threadCount) {};

@@ -1,4 +1,4 @@
-#include "ThreadPool.h"
+#include "thread_pool.h"
 
 ThreadPool::ThreadPool(size_t numThreads) : stopFlag(false) {
     for (size_t i = 0; i < numThreads; i++) {
@@ -22,6 +22,12 @@ ThreadPool::ThreadPool(size_t numThreads) : stopFlag(false) {
     }
 };
 
+ThreadPool::~ThreadPool() {
+    if (stopFlag) {
+        stop();
+    }
+};
+
 void ThreadPool::enqueueTask(std::function<void()> task) {
     {
         std::unique_lock<std::mutex> lock(queueMutex);
@@ -38,11 +44,5 @@ void ThreadPool::stop() {
     cv.notify_all();
     for (std::thread& worker : workers) {
         worker.join();
-    }
-};
-
-ThreadPool::~ThreadPool() {
-    if (stopFlag) {
-        stop();
     }
 };

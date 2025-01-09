@@ -67,7 +67,7 @@ These dependencies will be automatically installed via **vcpkg** during the setu
      cd ticker-pulse-bot
      mkdir build
      cd build
-     cmake ../src
+     cmake ..
      ```
 
    - This will configure the project and prepare it for compilation.

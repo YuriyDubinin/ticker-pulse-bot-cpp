@@ -1,5 +1,5 @@
-#include "utils/Bot/Bot.h"
-#include "../configs/config.h"
+#include "bot.h"
+#include "global_config.h"
 
 int main() {
     fmt::print("[TICKER-PULSE-BOT]: started, version: {}\n", VERSION);

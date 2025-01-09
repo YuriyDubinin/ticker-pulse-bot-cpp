@@ -9,7 +9,7 @@ project(TickerPulseBot)
 set(CMAKE_CXX_STANDARD 17)
 
 # Путь к файлу toolchain для vcpkg
-set(CMAKE_TOOLCHAIN_FILE "${CMAKE_SOURCE_DIR}/src/vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE STRING "Vcpkg toolchain file")
+set(CMAKE_TOOLCHAIN_FILE "${CMAKE_SOURCE_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE STRING "Vcpkg toolchain file")
 
 # Путь поиска пакетов 
 list(APPEND CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/vcpkg/installed/arm64-osx/share")
@@ -23,15 +23,17 @@ find_package(nlohmann_json REQUIRED)
 
 # Заголовочные файлы
 include_directories(src)
-include_directories("${CMAKE_SOURCE_DIR}/src/utils")
-include_directories("${CMAKE_SOURCE_DIR}/src/vcpkg/installed/arm64-osx/include")
-include_directories("${CMAKE_SOURCE_DIR}/configs")
+include_directories("${CMAKE_SOURCE_DIR}/vcpkg/installed/arm64-osx/include")
+include_directories("${CMAKE_SOURCE_DIR}/config")
+include_directories("${CMAKE_SOURCE_DIR}/include")
+include_directories("${CMAKE_SOURCE_DIR}/src")
+include_directories("${CMAKE_SOURCE_DIR}/vcpkg")
 
 # Исходные файлы
 add_executable(TickerPulseBot
-    "${CMAKE_SOURCE_DIR}/main.cpp"
-    "${CMAKE_SOURCE_DIR}/utils/ThreadPool/ThreadPool.cpp"
-    "${CMAKE_SOURCE_DIR}/utils/Bot/Bot.cpp"
+    "${CMAKE_SOURCE_DIR}/src/main.cpp"
+    "${CMAKE_SOURCE_DIR}/src/thread_pool.cpp"
+    "${CMAKE_SOURCE_DIR}/src/bot.cpp"
 )
 
 # Линк зависимостей с проектом

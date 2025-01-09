@@ -3,7 +3,7 @@
 
 #include <tgbot/tgbot.h>
 #include <fmt/core.h>
-#include "../ThreadPool/ThreadPool.h"
+#include "thread_pool.h"
 
 class Bot {
     public:
