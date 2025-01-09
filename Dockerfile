@@ -19,7 +19,7 @@ RUN mkdir /build
 
 # Building
 WORKDIR /build
-RUN cmake /src && make
+RUN cmake .. && make
 
 # Start command when starting a container
 CMD ["./TickerPulseBot"]
