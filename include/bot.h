@@ -18,6 +18,7 @@ class Bot {
 
     private:
         TgBot::Bot bot;
+        TgBot::InlineKeyboardMarkup::Ptr createMainKeyboard();
         ThreadPool pool;
 };
 

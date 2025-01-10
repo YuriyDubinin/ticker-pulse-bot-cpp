@@ -1,4 +1,5 @@
 #include <string>
+#include <vector>
 #include <fmt/core.h>
 #include "bot.h"
 #include "global_config.h"
@@ -15,7 +16,24 @@ void Bot::start() {
         onStartCommand(message);
     });
 
-    // Обработка любых сообщений
+    // Обработка команды /help
+    bot.getEvents().onCommand("help", [this](TgBot::Message::Ptr message) {
+       bot.getApi().sendMessage(message->chat->id, 
+        "*Список команд бота:*\n\n" 
+        "/start - Начать общение с ботом\n" 
+        "/help - Получить справку по командам\n" 
+        "/info - Получить информацию о боте"
+        );
+    });
+
+    // Обработка команды /info
+    bot.getEvents().onCommand("info", [this](TgBot::Message::Ptr message) {
+       bot.getApi().sendMessage(message->chat->id, 
+        "Бот предназначен для предоставления информации о криптовалюте, на данный моент находится на стадии разработки."
+        );
+    });
+
+    // Обработка остальных сообщений
     bot.getEvents().onAnyMessage([this](TgBot::Message::Ptr message) {
         onAnyMessage(message);
     });
@@ -41,27 +59,8 @@ void Bot::start() {
 };
 
 void Bot::onStartCommand(TgBot::Message::Ptr message) {
-    TgBot::InlineKeyboardMarkup::Ptr keyboard(new TgBot::InlineKeyboardMarkup);
-
-    // Создание кнопок
-    TgBot::InlineKeyboardButton::Ptr button1(new TgBot::InlineKeyboardButton);
-    button1->text = "📉 Курс валют";
-    button1->callbackData = "ACTUAL";
-
-    TgBot::InlineKeyboardButton::Ptr button3(new TgBot::InlineKeyboardButton);
-    button3->text = "⚙️ Команды";
-    button3->callbackData = "ATIONS";
-
-    TgBot::InlineKeyboardButton::Ptr button4(new TgBot::InlineKeyboardButton);
-    button4->text = "ℹ️ Информация";
-    button4->callbackData = "INFO";
-
-    // Добавление кнопок в ряды
-    keyboard->inlineKeyboard.push_back({button1});
-    keyboard->inlineKeyboard.push_back({button3, button4});
-
-    // Отправка приветственного сообщения с клавиатурой
-    bot.getApi().sendMessage(message->chat->id, "📊 Привет! Я отслеживаю курсы криптовалют. 🚀", false, 0, keyboard);
+    TgBot::InlineKeyboardMarkup::Ptr mainKeyboard = createMainKeyboard();
+    bot.getApi().sendMessage(message->chat->id, "📊 Привет! Я отслеживаю курсы криптовалют. 🚀", false, 0, mainKeyboard);
 };
 
 void Bot::onAnyMessage(TgBot::Message::Ptr message) {
@@ -88,18 +87,34 @@ void Bot::onCallbackQuery(TgBot::CallbackQuery::Ptr callbackQuery) {
     if (callbackQuery->data == "ACTUAL") { 
         CryptoFetcher fetcher;
         const std::string symbol = "bitcoin";
-        nlohmann::json result = fetcher.fetchCoinGecko(symbol);
+        std::map<std::string, std::string> cryptoMap = {
+            {"bitcoin", "BTC"},
+            {"ethereum", "ETH"},
+            {"tether", "USDT"},
+            {"binancecoin", "BNB"},
+            {"usd-coin", "USDC"},
+            {"ripple", "XRP"},
+            {"cardano", "ADA"},
+            {"dogecoin", "DOGE"},
+            {"solana", "SOL"},
+        };
+        std::vector<std::string> cryptoKeysVector;  // for request to CoinGecko
+
+        for (const auto& pair : cryptoMap) {
+            cryptoKeysVector.push_back(pair.first);
+        };
+
+        std::string symbolsString = utils::stringifyStringsVectorToString(cryptoKeysVector, ",");
+        nlohmann::json result = fetcher.fetchCoinGecko(symbolsString);
+        std::string answer = "📈 Актуальный курс\nведущих криптовалют: \n";
 
         if (!result.empty()) {
             try {
-                double defaultPrice = result[symbol]["usd"];
-                std::string price = utils::toFixedDouble(defaultPrice, 2);    
-                std::string answer = 
-                "BTC: " + price + " $" +
-                "\nETH: " + "12333"
-                ;
+                for (const auto& [key, value] : result.items()) {
+                    double usdValue = value.at("usd");
+                    answer = answer + "\n" + utils::capitalizeFirstLetter(key) + " " + cryptoMap[key] + ": " + utils::toFixedDouble(usdValue, 2) + " $";
+                };
 
-                fmt::print("[TICKER_PULSE_BOT]: The price of {} is $ {}\n", symbol, price);
                 bot.getApi().sendMessage(callbackQuery->message->chat->id, answer);
             } catch (const nlohmann::json::exception& e) {
                 fmt::print(stderr, "[TICKER_PULSE_BOT]: Error when retrieving data from JSON: {}\n", e.what());
@@ -110,8 +125,38 @@ void Bot::onCallbackQuery(TgBot::CallbackQuery::Ptr callbackQuery) {
     } else if (callbackQuery->data == "SELECT_CURRENCY") {
         bot.getApi().sendMessage(callbackQuery->message->chat->id, "Вызов меню выбора криптовалюты");
     } else if (callbackQuery->data == "ATIONS") {
-        bot.getApi().sendMessage(callbackQuery->message->chat->id, "Список команд бота");
+        bot.getApi().sendMessage(callbackQuery->message->chat->id, 
+            "*Список команд бота:*\n\n" 
+            "/start - Начать общение с ботом\n" 
+            "/help - Получить справку по командам\n" 
+            "/info - Получить информацию о боте"
+        );
     } else if (callbackQuery->data == "INFO") {
-        bot.getApi().sendMessage(callbackQuery->message->chat->id, "Обновления: Бот теперь поддерживает новые валюты.");
+        bot.getApi().sendMessage(callbackQuery->message->chat->id, 
+            "Бот предназначен для предоставления информации о криптовалюте, на данный моент находится на стадии разработки."
+        );
     }
+};
+
+TgBot::InlineKeyboardMarkup::Ptr Bot::createMainKeyboard() {
+    TgBot::InlineKeyboardMarkup::Ptr keyboard(new TgBot::InlineKeyboardMarkup);
+
+    // Создание кнопок
+    TgBot::InlineKeyboardButton::Ptr button1(new TgBot::InlineKeyboardButton);
+    button1->text = "📈 Курс ведущих валют";
+    button1->callbackData = "ACTUAL";
+
+    TgBot::InlineKeyboardButton::Ptr button3(new TgBot::InlineKeyboardButton);
+    button3->text = "⚙️ Команды";
+    button3->callbackData = "ATIONS";
+
+    TgBot::InlineKeyboardButton::Ptr button4(new TgBot::InlineKeyboardButton);
+    button4->text = "ℹ️ Информация";
+    button4->callbackData = "INFO";
+
+    // Добавление кнопок в ряды
+    keyboard->inlineKeyboard.push_back({button1});
+    keyboard->inlineKeyboard.push_back({button3, button4});
+
+    return keyboard;
 };
