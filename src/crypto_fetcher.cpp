@@ -17,7 +17,7 @@ size_t CryptoFetcher::writeCallback(void* contents, size_t size, size_t nmemb, v
     return size * nmemb;
 }
 
-nlohmann::json CryptoFetcher::fetchCoinGecko(const std::string& symbol) {
+nlohmann::json CryptoFetcher::fetchCoinGecko(const std::string& url) {
     CURL* curl;
     CURLcode res;
     std::string readBuffer;
@@ -25,9 +25,6 @@ nlohmann::json CryptoFetcher::fetchCoinGecko(const std::string& symbol) {
     // Инициализация CURL
     curl = curl_easy_init();
     if(curl) {
-        // Создание URL для запроса
-        std::string url = "https://api.coingecko.com/api/v3/simple/price?ids=" + symbol + "&vs_currencies=usd";
-
         // Установка URL и других параметров CURL
         curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallback);

@@ -1,6 +1,7 @@
 #include <string>
 #include <vector>
 #include <fmt/core.h>
+#include <chrono>
 #include "bot.h"
 #include "global_config.h"
 #include "bot.h"
@@ -112,7 +113,8 @@ void Bot::onCallbackQuery(TgBot::CallbackQuery::Ptr callbackQuery) {
         };
 
         std::string symbolsString = utils::stringifyStringsVectorToString(cryptoKeysVector, ",");
-        nlohmann::json result = fetcher.fetchCoinGecko(symbolsString);
+        std::string url = "https://api.coingecko.com/api/v3/simple/price?ids=" + symbolsString + "&vs_currencies=usd";
+        nlohmann::json result = fetcher.fetchCoinGecko(url);
         std::string answer = "📈 Актуальный курс\nведущих криптовалют: \n";
 
         if (!result.empty()) {
