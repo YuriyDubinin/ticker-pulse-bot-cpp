@@ -19,7 +19,7 @@ void Bot::start() {
     // Обработка команды /help
     bot.getEvents().onCommand("help", [this](TgBot::Message::Ptr message) {
        bot.getApi().sendMessage(message->chat->id, 
-        "*Список команд бота:*\n\n" 
+        "📔 Список команд бота:\n\n" 
         "/start - Начать общение с ботом\n" 
         "/help - Получить справку по командам\n" 
         "/info - Получить информацию о боте"
@@ -29,7 +29,7 @@ void Bot::start() {
     // Обработка команды /info
     bot.getEvents().onCommand("info", [this](TgBot::Message::Ptr message) {
        bot.getApi().sendMessage(message->chat->id, 
-        "Бот предназначен для предоставления информации о криптовалюте, на данный моент находится на стадии разработки."
+        "ℹ️ Бот предназначен для предоставления информации о криптовалюте, на данный моент находится на стадии разработки."
         );
     });
 
@@ -66,10 +66,17 @@ void Bot::onStartCommand(TgBot::Message::Ptr message) {
 void Bot::onAnyMessage(TgBot::Message::Ptr message) {
     fmt::print("User wrote {}\n", message->text);
 
-    if (message->text.find("/start") != 0) {
+    if (
+        message->text.find("/start") != 0 &&
+        message->text.find("/help") != 0 &&
+        message->text.find("/info") != 0
+    ) {
         // Добавляем задачу в пул потоков
         pool.enqueueTask([this, message]() {
-            bot.getApi().sendMessage(message->chat->id, "Your message is: " + message->text);
+            bot.getApi().sendMessage(message->chat->id, "Не понимаю что делать с " + message->text + ".\n📔 Список команд бота:\n\n" 
+            "/start - Начать общение с ботом\n" 
+            "/help - Получить справку по командам\n" 
+            "/info - Получить информацию о боте");
         });
     }
 };
@@ -126,14 +133,14 @@ void Bot::onCallbackQuery(TgBot::CallbackQuery::Ptr callbackQuery) {
         bot.getApi().sendMessage(callbackQuery->message->chat->id, "Вызов меню выбора криптовалюты");
     } else if (callbackQuery->data == "ATIONS") {
         bot.getApi().sendMessage(callbackQuery->message->chat->id, 
-            "*Список команд бота:*\n\n" 
+            "📔 Список команд бота:\n\n" 
             "/start - Начать общение с ботом\n" 
             "/help - Получить справку по командам\n" 
             "/info - Получить информацию о боте"
         );
     } else if (callbackQuery->data == "INFO") {
         bot.getApi().sendMessage(callbackQuery->message->chat->id, 
-            "Бот предназначен для предоставления информации о криптовалюте, на данный моент находится на стадии разработки."
+            "ℹ️ Бот предназначен для предоставления информации о криптовалюте, на данный моент находится на стадии разработки."
         );
     }
 };
@@ -147,7 +154,7 @@ TgBot::InlineKeyboardMarkup::Ptr Bot::createMainKeyboard() {
     button1->callbackData = "ACTUAL";
 
     TgBot::InlineKeyboardButton::Ptr button3(new TgBot::InlineKeyboardButton);
-    button3->text = "⚙️ Команды";
+    button3->text = "📔 Команды";
     button3->callbackData = "ATIONS";
 
     TgBot::InlineKeyboardButton::Ptr button4(new TgBot::InlineKeyboardButton);
