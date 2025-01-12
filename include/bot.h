@@ -27,7 +27,7 @@ class Bot {
         void sendToGroup(const std::string& groupId, const std::string& messageText);
         void onCallbackQuery(TgBot::CallbackQuery::Ptr callbackQuery);
         void setCurrencyLimites();
-        void checkLimitValuesAtInterval();
+        void checkLimitValuesAtInterval(const unsigned int seconds);
 };
 
 #endif

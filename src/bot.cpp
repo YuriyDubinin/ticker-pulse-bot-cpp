@@ -67,7 +67,7 @@ void Bot::start() {
 
         setCurrencyLimites();
 
-        // Запуск Long Polling
+        // Запуск long polling
         TgBot::TgLongPoll longPoll(bot);
         while (true) {
             fmt::print("[TICKER_PULSE_BOT]: Long poll started\n");
@@ -75,7 +75,7 @@ void Bot::start() {
         }
     } catch (TgBot::TgException& e) {
         fmt::print("[TICKER_PULSE_BOT]: {}\n", e.what());
-    }
+    };
 };
 
 void Bot::onStartCommand(TgBot::Message::Ptr message) {
@@ -107,7 +107,7 @@ void Bot::sendToGroup(const std::string& groupId, const std::string& messageText
         fmt::print("[TICKER_PULSE_BOT]: Message sent to group {}\n", groupId);
     } catch (TgBot::TgException& e) {
         fmt::print("[TICKER_PULSE_BOT]: Failed to send message to group {}: {}\n", groupId, e.what());
-    }
+    };
 };
 
 void Bot::onCallbackQuery(TgBot::CallbackQuery::Ptr callbackQuery) {
@@ -132,6 +132,7 @@ void Bot::onCallbackQuery(TgBot::CallbackQuery::Ptr callbackQuery) {
 
                 bot.getApi().sendMessage(callbackQuery->message->chat->id, answer);
             } catch (const nlohmann::json::exception& e) {
+                bot.getApi().sendMessage(callbackQuery->message->chat->id, "⌛ Я загружен, скоро освобожусь.");
                 fmt::print(stderr, "[TICKER_PULSE_BOT]: Error when retrieving data from JSON: {}\n", e.what());
             }
         } else {
@@ -186,25 +187,29 @@ void Bot::setCurrencyLimites() {
             std::vector<double> minMaxValues = utils::findCurrencyMinMax(result["prices"]);
             limites[currencyName] = minMaxValues;
 
-            fmt::print("{}, Min: {}, Max: {}\n", currencyName, minMaxValues[0], minMaxValues[1]);
+            fmt::print("{}, min: {}, max: {}\n", currencyName, minMaxValues[0], minMaxValues[1]);
             // fmt::print("{}", result["prices"].dump(2));
 
             std::this_thread::sleep_for(std::chrono::seconds(5));
         } catch (const std::exception& e) {
             fmt::print("[TICKER_PULSE_BOT]: Error setting limites: {}\n", e.what());
-        }
+        };
     }
 };
 
-void Bot::checkLimitValuesAtInterval() {
+void Bot::checkLimitValuesAtInterval(const unsigned int seconds) {
+    std::this_thread::sleep_for(std::chrono::seconds(seconds));
+
     while (true) {
+        const std::string message = fmt::format("{}, min: {}, max: {}", "bitcoin", limites["bitcoin"][0], limites["bitcoin"][1]);
+
         try {
-            // fmt::print("{}", result["prices"].dump(2));
-            sendToGroup(GROUP_ID, "10 sec test");
+            sendToGroup(GROUP_ID, message);
         } catch (const std::exception& e) {
             fmt::print("[TICKER_PULSE_BOT]: Error sending message to group: {}\n", e.what());
-        }
-        std::this_thread::sleep_for(std::chrono::seconds(10));
+        };
+
+        std::this_thread::sleep_for(std::chrono::seconds(seconds));
     }
 };
 
