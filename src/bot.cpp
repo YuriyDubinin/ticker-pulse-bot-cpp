@@ -26,10 +26,6 @@ std::map<std::string, std::string> Bot::cryptoMap = {
 };
 
 void Bot::start() {
-    // pool.enqueueTask([this]() {
-    //     checkLimitValuesAtInterval();
-    // });
-
     // Обработка команды /start
     bot.getEvents().onCommand("start", [this](TgBot::Message::Ptr message) {
         onStartCommand(message);
@@ -65,7 +61,14 @@ void Bot::start() {
     try {
         fmt::print("[TICKER_PULSE_BOT]: TG username - {}\n", bot.getApi().getMe()->username);
 
-        setCurrencyLimites();
+        // setCurrencyLimites();
+        pool.enqueueTask([this]() {
+            setCurrencyLimites();
+        });
+
+        pool.enqueueTask([this]() {
+            checkLimitValuesAtInterval(15);
+        });
 
         // Запуск long polling
         TgBot::TgLongPoll longPoll(bot);
@@ -92,12 +95,16 @@ void Bot::onAnyMessage(TgBot::Message::Ptr message) {
         message->text.find("/info") != 0
     ) {
         // Добавляем задачу в пул потоков
-        pool.enqueueTask([this, message]() {
-            bot.getApi().sendMessage(message->chat->id, "Не понимаю что делать с " + message->text + ".\n📔 Список команд бота:\n\n" 
-            "/start - Начать общение с ботом\n" 
-            "/help - Получить справку по командам\n" 
-            "/info - Получить информацию о боте");
-        });
+        // pool.enqueueTask([this, message]() {
+        //     bot.getApi().sendMessage(message->chat->id, "Не понимаю что делать с " + message->text + ".\n📔 Список команд бота:\n\n" 
+        //     "/start - Начать общение с ботом\n" 
+        //     "/help - Получить справку по командам\n" 
+        //     "/info - Получить информацию о боте");
+        // });
+        bot.getApi().sendMessage(message->chat->id, "Не понимаю что делать с " + message->text + ".\n📔 Список команд бота:\n\n" 
+        "/start - Начать общение с ботом\n" 
+        "/help - Получить справку по командам\n" 
+        "/info - Получить информацию о боте");
     }
 };
 

@@ -4,7 +4,7 @@
 int main() {
     fmt::print("[TICKER_PULSE_BOT]: started, version: {}\n", VERSION);
 
-    Bot bot(API_KEY, 2);
+    Bot bot(API_KEY, 4);
 
     bot.start();
 
