@@ -35,4 +35,23 @@ namespace utils {
 
         return result;
     };
+
+    std::vector<double> findCurrencyMinMax(const std::vector<std::vector<double>>& data) {
+        double minVal = data[0][1];
+        double maxVal = data[0][1];
+
+        for (const auto& entry : data) {
+            double value = entry[1];
+
+            if (value < minVal) {
+                minVal = value;
+            }
+            
+            if (value > maxVal) {
+                maxVal = value;
+            }
+        }
+
+        return {minVal, maxVal};
+    };
 };

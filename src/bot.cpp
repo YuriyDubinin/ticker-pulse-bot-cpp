@@ -2,16 +2,34 @@
 #include <vector>
 #include <fmt/core.h>
 #include <chrono>
+#include <thread>
 #include "bot.h"
 #include "global_config.h"
 #include "bot.h"
 #include "crypto_fetcher.h"
 #include "utils.h"
+#include "thread_pool.h"
 
 Bot::Bot(const std::string& token, int threadCount)
-    : bot(token), pool(threadCount) {};
+    : bot(token), pool(threadCount), fetcher() {};
+
+std::map<std::string, std::string> Bot::cryptoMap = {
+    {"bitcoin", "BTC"},
+    {"ethereum", "ETH"},
+    {"tether", "USDT"},
+    {"binancecoin", "BNB"},
+    {"usd-coin", "USDC"},
+    {"ripple", "XRP"},
+    {"cardano", "ADA"},
+    {"dogecoin", "DOGE"},
+    {"solana", "SOL"},
+};
 
 void Bot::start() {
+    // pool.enqueueTask([this]() {
+    //     checkLimitValuesAtInterval();
+    // });
+
     // Обработка команды /start
     bot.getEvents().onCommand("start", [this](TgBot::Message::Ptr message) {
         onStartCommand(message);
@@ -45,8 +63,9 @@ void Bot::start() {
     });
 
     try {
-        // Печать имени бота
         fmt::print("[TICKER_PULSE_BOT]: TG username - {}\n", bot.getApi().getMe()->username);
+
+        setCurrencyLimites();
 
         // Запуск Long Polling
         TgBot::TgLongPoll longPoll(bot);
@@ -93,27 +112,14 @@ void Bot::sendToGroup(const std::string& groupId, const std::string& messageText
 
 void Bot::onCallbackQuery(TgBot::CallbackQuery::Ptr callbackQuery) {
     if (callbackQuery->data == "ACTUAL") { 
-        CryptoFetcher fetcher;
-        const std::string symbol = "bitcoin";
-        std::map<std::string, std::string> cryptoMap = {
-            {"bitcoin", "BTC"},
-            {"ethereum", "ETH"},
-            {"tether", "USDT"},
-            {"binancecoin", "BNB"},
-            {"usd-coin", "USDC"},
-            {"ripple", "XRP"},
-            {"cardano", "ADA"},
-            {"dogecoin", "DOGE"},
-            {"solana", "SOL"},
-        };
         std::vector<std::string> cryptoKeysVector;  // for request to CoinGecko
 
         for (const auto& pair : cryptoMap) {
             cryptoKeysVector.push_back(pair.first);
         };
 
-        std::string symbolsString = utils::stringifyStringsVectorToString(cryptoKeysVector, ",");
-        std::string url = "https://api.coingecko.com/api/v3/simple/price?ids=" + symbolsString + "&vs_currencies=usd";
+        std::string currenciesString = utils::stringifyStringsVectorToString(cryptoKeysVector, ",");
+        std::string url = "https://api.coingecko.com/api/v3/simple/price?ids=" + currenciesString + "&vs_currencies=usd";
         nlohmann::json result = fetcher.fetchCoinGecko(url);
         std::string answer = "📈 Актуальный курс\nведущих криптовалют: \n";
 
@@ -169,3 +175,36 @@ TgBot::InlineKeyboardMarkup::Ptr Bot::createMainKeyboard() {
 
     return keyboard;
 };
+
+void Bot::setCurrencyLimites() {
+    const std::map<std::string, std::vector<double>> updatedLimites;
+
+    for (const auto& [currencyName, symbol] : cryptoMap) {
+        try {
+            std::string url = fmt::format("https://api.coingecko.com/api/v3/coins/{}/market_chart?vs_currency=usd&days=30", currencyName);
+            nlohmann::json result = fetcher.fetchCoinGecko(url);
+            std::vector<double> minMaxValues = utils::findCurrencyMinMax(result["prices"]);
+            limites[currencyName] = minMaxValues;
+
+            fmt::print("{}, Min: {}, Max: {}\n", currencyName, minMaxValues[0], minMaxValues[1]);
+            // fmt::print("{}", result["prices"].dump(2));
+
+            std::this_thread::sleep_for(std::chrono::seconds(5));
+        } catch (const std::exception& e) {
+            fmt::print("[TICKER_PULSE_BOT]: Error setting limites: {}\n", e.what());
+        }
+    }
+};
+
+void Bot::checkLimitValuesAtInterval() {
+    while (true) {
+        try {
+            // fmt::print("{}", result["prices"].dump(2));
+            sendToGroup(GROUP_ID, "10 sec test");
+        } catch (const std::exception& e) {
+            fmt::print("[TICKER_PULSE_BOT]: Error sending message to group: {}\n", e.what());
+        }
+        std::this_thread::sleep_for(std::chrono::seconds(10));
+    }
+};
+
