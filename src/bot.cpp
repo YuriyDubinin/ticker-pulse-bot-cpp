@@ -61,7 +61,6 @@ void Bot::start() {
     try {
         fmt::print("[TICKER_PULSE_BOT]: TG username - {}\n", bot.getApi().getMe()->username);
 
-        // setCurrencyLimites();
         pool.enqueueTask([this]() {
             setCurrencyLimites();
         });
@@ -87,20 +86,13 @@ void Bot::onStartCommand(TgBot::Message::Ptr message) {
 };
 
 void Bot::onAnyMessage(TgBot::Message::Ptr message) {
-    fmt::print("User wrote {}\n", message->text);
+    fmt::print("[TICKER_PULSE_BOT]: [CHAT]: {}\n", message->text);
 
     if (
         message->text.find("/start") != 0 &&
         message->text.find("/help") != 0 &&
         message->text.find("/info") != 0
     ) {
-        // Добавляем задачу в пул потоков
-        // pool.enqueueTask([this, message]() {
-        //     bot.getApi().sendMessage(message->chat->id, "Не понимаю что делать с " + message->text + ".\n📔 Список команд бота:\n\n" 
-        //     "/start - Начать общение с ботом\n" 
-        //     "/help - Получить справку по командам\n" 
-        //     "/info - Получить информацию о боте");
-        // });
         bot.getApi().sendMessage(message->chat->id, "Не понимаю что делать с " + message->text + ".\n📔 Список команд бота:\n\n" 
         "/start - Начать общение с ботом\n" 
         "/help - Получить справку по командам\n" 
@@ -189,7 +181,7 @@ void Bot::setCurrencyLimites() {
 
     for (const auto& [currencyName, symbol] : cryptoMap) {
         try {
-            std::string url = fmt::format("https://api.coingecko.com/api/v3/coins/{}/market_chart?vs_currency=usd&days=30", currencyName);
+            std::string url = fmt::format("https://api.coingecko.com/api/v3/coins/{}/market_chart?vs_currency=usd&days=7", currencyName);
             nlohmann::json result = fetcher.fetchCoinGecko(url);
             std::vector<double> minMaxValues = utils::findCurrencyMinMax(result["prices"]);
             limites[currencyName] = minMaxValues;
@@ -206,15 +198,42 @@ void Bot::setCurrencyLimites() {
 
 void Bot::checkLimitValuesAtInterval(const unsigned int seconds) {
     std::this_thread::sleep_for(std::chrono::seconds(seconds));
+    std::vector<std::string> cryptoKeysVector;  // for request to CoinGecko
+
+    for (const auto& pair : cryptoMap) {
+        cryptoKeysVector.push_back(pair.first);
+    };
+    
+    std::string currenciesString = utils::stringifyStringsVectorToString(cryptoKeysVector, ",");
+    std::string url = "https://api.coingecko.com/api/v3/simple/price?ids=" + currenciesString + "&vs_currencies=usd";
 
     while (true) {
-        const std::string message = fmt::format("{}, min: {}, max: {}", "bitcoin", limites["bitcoin"][0], limites["bitcoin"][1]);
+        nlohmann::json result = fetcher.fetchCoinGecko(url);
 
-        try {
-            sendToGroup(GROUP_ID, message);
-        } catch (const std::exception& e) {
-            fmt::print("[TICKER_PULSE_BOT]: Error sending message to group: {}\n", e.what());
-        };
+        if (!result.empty()) {
+            try {
+                for (const auto& [key, value] : result.items()) {
+                    if (limites.find(key) != limites.end()) {
+                        std::string message;
+                        double usdValue = value.at("usd");
+                        const double& min = limites[key][0];
+                        const double& max = limites[key][1];
+
+                        if (usdValue < min) {
+                            message = fmt::format("⬇️ {} {}: {} $, это ниже минимальной цены за последние 7 дней! ({} $)", key, cryptoMap[key], utils::toFixedDouble(usdValue, 2), utils::toFixedDouble(min, 2));
+                            sendToGroup(GROUP_ID, message);
+                        }
+
+                        if (usdValue > max) {
+                            message = fmt::format("⬆️ {} {}: {} $, это выше максимальной цены за последние 7 дней! ({} $)", key, cryptoMap[key], utils::toFixedDouble(usdValue, 2), utils::toFixedDouble(max, 2));
+                            sendToGroup(GROUP_ID, message);
+                        }
+                    }
+                };
+            } catch (const std::exception& e) {
+                fmt::print("[TICKER_PULSE_BOT]: [checkLimitValuesAtInterval]: Error sending message to group: {}\n", e.what());
+            };
+        }
 
         std::this_thread::sleep_for(std::chrono::seconds(seconds));
     }
