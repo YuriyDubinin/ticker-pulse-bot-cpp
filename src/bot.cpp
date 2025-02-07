@@ -66,7 +66,7 @@ void Bot::start() {
         });
 
         pool.enqueueTask([this]() {
-            checkLimitValuesAtInterval(15);
+            checkLimitValuesAtInterval(CHECK_LIMIT_INTERVAL);
         });
 
         // Запуск long polling
@@ -217,7 +217,6 @@ void Bot::checkLimitValuesAtInterval(const unsigned int seconds) {
                         double usdValue = value.at("usd");
                         const double& min = limites[key][0];
                         const double& max = limites[key][1];
-
                         if (usdValue < min) {
                             message = fmt::format("⬇️ {} {}: {} $, это ниже минимальной цены за последние 7 дней! ({} $)", key, cryptoMap[key], utils::toFixedDouble(usdValue, 2), utils::toFixedDouble(min, 2));
                             sendToGroup(GROUP_ID, message);
