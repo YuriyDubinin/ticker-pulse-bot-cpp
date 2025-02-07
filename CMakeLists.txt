@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
 # Устанавливаем политику CMP0167 на NEW
-cmake_policy(SET CMP0167 NEW)
+# cmake_policy(SET CMP0167 NEW)
 
 project(TickerPulseBot)
 
@@ -44,4 +44,16 @@ target_link_libraries(TickerPulseBot ZLIB::ZLIB)
 target_link_libraries(TickerPulseBot OpenSSL::SSL OpenSSL::Crypto)
 target_link_libraries(TickerPulseBot nlohmann_json::nlohmann_json)
 target_link_libraries(TickerPulseBot CURL::libcurl)
-target_link_libraries(TickerPulseBot "${CMAKE_SOURCE_DIR}/vcpkg/installed/arm64-osx/lib/libTgBot.a")
+
+# Использование различных версий tgbot-cpp учитывая целевую платформу
+if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    # MacOS arm64-osx
+    message(STATUS "Building for macOS")
+    target_link_libraries(TickerPulseBot "${CMAKE_SOURCE_DIR}/vcpkg/installed/arm64-osx/lib/libTgBot.a")
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    # Linux arm64-linux
+    message(STATUS "Building for Linux")
+    target_link_libraries(TickerPulseBot "${CMAKE_SOURCE_DIR}/vcpkg/installed/arm64-linux/lib/libTgBot.a")
+else()
+    message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
+endif()

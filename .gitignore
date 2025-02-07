@@ -1,14 +1,14 @@
-# Системные файлы
+# Сстемные файлы
 .DS_Store
 Thumbs.db
 
-# IDE/Editor-specific files
+# Специфические файлы IDE и редакторов
 .vscode/
 .idea/
 *.sublime-workspace
 *.sublime-project
 
-# CMake
+# CMake файлы и дирректории
 CMakeCache.txt
 CMakeFiles/
 CMakeScripts/
@@ -21,7 +21,7 @@ CMakePresets.json
 build/
 out/
 
-# Файлы компиляции
+# Файлов компиляции
 *.o
 *.a
 *.so
@@ -31,7 +31,7 @@ out/
 *.out
 *.log
 
-# Сгенерированные файлы
+# Сгенерированные файлоы
 *.elf
 *.bin
 *.d
@@ -40,7 +40,7 @@ out/
 *.suo
 *.user
 
-# Файлы, сгенерированные компиляторами (например, g++ или clang++)
+# Файлы сгенерированные компиляторами (например, g++ или clang++)
 *.gch
 *.pch
 

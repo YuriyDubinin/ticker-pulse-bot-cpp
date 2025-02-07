@@ -24,7 +24,8 @@ nlohmann::json CryptoFetcher::fetchCoinGecko(const std::string& url) {
 
     // Инициализация CURL
     curl = curl_easy_init();
-    if(curl) {
+    
+    if (curl) {
         // Установка URL и других параметров CURL
         curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallback);
@@ -34,7 +35,7 @@ nlohmann::json CryptoFetcher::fetchCoinGecko(const std::string& url) {
         res = curl_easy_perform(curl);
 
         // Проверка на ошибки
-        if(res != CURLE_OK) {
+        if (res != CURLE_OK) {
             fmt::print("[CRYPTO_FETCHER]: cURL error: {}\n", curl_easy_strerror(res));
         }
 

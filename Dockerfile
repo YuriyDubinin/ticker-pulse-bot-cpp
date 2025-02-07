@@ -1,25 +1,38 @@
 FROM ubuntu:22.04
 
-# OS packages
-RUN apt-get update && \
-    apt-get install -y \
+# Установка необходимых зависимостей для системы
+RUN apt-get update && apt-get install -y \
     build-essential \
-    cmake \
+    g++-11 \
+    curl \
+    zip \
+    unzip \
+    tar \
     git \
-    g++
+    cmake \
+    ninja-build \
+    pkg-config \
+    libssl-dev \
+    ca-certificates && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Copying sources into a container
-COPY src /src
+WORKDIR /app
+COPY . .
 
-# Working directory
-WORKDIR /src
+# Настройка vcpkg
+RUN git clone https://github.com/microsoft/vcpkg.git vcpkg
+WORKDIR /app/vcpkg
+RUN ./bootstrap-vcpkg.sh
 
-# Build directory
-RUN mkdir /build
+# Установка зависимостей через vcpkg
+RUN ./vcpkg install fmt zlib openssl nlohmann-json curl tgbot-cpp
 
-# Building
-WORKDIR /build
-RUN cmake .. && make
+# Создание директории для сборки
+WORKDIR /app/build
 
-# Start command when starting a container
+# Сборка проекта с использованием CMake и toolchain vcpkg
+RUN cmake .. -DCMAKE_TOOLCHAIN_FILE=/app/vcpkg/scripts/buildsystems/vcpkg.cmake
+RUN make
+
+# Определение команды для запуска бота
 CMD ["./TickerPulseBot"]

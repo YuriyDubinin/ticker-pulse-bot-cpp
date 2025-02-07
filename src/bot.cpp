@@ -50,7 +50,7 @@ void Bot::start() {
 
     // Обработка остальных сообщений
     bot.getEvents().onAnyMessage([this](TgBot::Message::Ptr message) {
-        onAnyMessage(message);
+        // onAnyMessage(message);
     });
 
     // Обработка callback-данных
@@ -187,7 +187,6 @@ void Bot::setCurrencyLimites() {
             limites[currencyName] = minMaxValues;
 
             fmt::print("{}, min: {}, max: {}\n", currencyName, minMaxValues[0], minMaxValues[1]);
-            // fmt::print("{}", result["prices"].dump(2));
 
             std::this_thread::sleep_for(std::chrono::seconds(5));
         } catch (const std::exception& e) {

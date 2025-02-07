@@ -20,6 +20,7 @@ namespace utils {
             if (i > 0) {
                 result += delimiter;  // Добавляем разделитель перед каждым элементом, кроме первого
             }
+            
             result += stringVector[i];
         }
         
@@ -30,6 +31,7 @@ namespace utils {
         if (string.empty()) {
             return string;
         };
+
         std::string result = string;
         result[0] = std::toupper(result[0]);
 
