@@ -1,5 +1,4 @@
-# FROM ubuntu:22.04
-FROM --platform=linux/arm64 ubuntu:22.04
+FROM ubuntu:22.04
 
 # Установка необходимых зависимостей для системы
 RUN apt-get update && apt-get install -y \
