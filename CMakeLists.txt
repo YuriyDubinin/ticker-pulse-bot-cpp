@@ -47,13 +47,13 @@ target_link_libraries(TickerPulseBot CURL::libcurl)
 
 # Использование различных версий tgbot-cpp учитывая целевую платформу
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-    # MacOS arm64-osx
+    # osx/arm64
     message(STATUS "Building for macOS")
     target_link_libraries(TickerPulseBot "${CMAKE_SOURCE_DIR}/vcpkg/installed/arm64-osx/lib/libTgBot.a")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    # Linux arm64-linux
+    # linux/amd64
     message(STATUS "Building for Linux")
-    target_link_libraries(TickerPulseBot "${CMAKE_SOURCE_DIR}/vcpkg/installed/arm64-linux/lib/libTgBot.a")
+    target_link_libraries(TickerPulseBot "${CMAKE_SOURCE_DIR}/vcpkg/installed/x64-linux/lib/libTgBot.a")
 else()
     message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
 endif()
