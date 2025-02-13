@@ -23,6 +23,7 @@ std::map<std::string, std::string> Bot::cryptoMap = {
     {"cardano", "ADA"},
     {"dogecoin", "DOGE"},
     {"solana", "SOL"},
+    {"toncoin", "TON"},
 };
 
 void Bot::start() {
