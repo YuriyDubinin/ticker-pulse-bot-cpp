@@ -14,16 +14,16 @@ Bot::Bot(const std::string& token, int threadCount)
     : bot(token), pool(threadCount), fetcher() {};
 
 std::map<std::string, std::string> Bot::cryptoMap = {
-    {"bitcoin", "BTC"},
-    {"ethereum", "ETH"},
-    {"tether", "USDT"},
-    {"binancecoin", "BNB"},
-    {"usd-coin", "USDC"},
-    {"ripple", "XRP"},
-    {"cardano", "ADA"},
-    {"dogecoin", "DOGE"},
-    {"solana", "SOL"},
-    {"toncoin", "TON"},
+    {"bitcoin", "Bitcoin (BTC)"},
+    {"ethereum", "Etherium (ETH)"},
+    {"tether", "Tether ERC-20 (USDT)"},
+    {"binancecoin", "Binance Coin (BNB)"},
+    {"usd-coin", "Usd Coin (USDC)"},
+    {"ripple", "Ripple (XRP)"},
+    {"cardano", "Cardano (ADA)"},
+    {"dogecoin", "Dogecoin (DOGE)"},
+    {"solana", "Solana (SOL)"},
+    {"the-open-network", "Toncoin (TON)"},
 };
 
 void Bot::start() {
@@ -33,21 +33,21 @@ void Bot::start() {
     });
 
     // Обработка команды /help
-    bot.getEvents().onCommand("help", [this](TgBot::Message::Ptr message) {
-       bot.getApi().sendMessage(message->chat->id, 
-        "📔 Список команд бота:\n\n" 
-        "/start - Начать общение с ботом\n" 
-        "/help - Получить справку по командам\n" 
-        "/info - Получить информацию о боте"
-        );
-    });
+    // bot.getEvents().onCommand("help", [this](TgBot::Message::Ptr message) {
+    //    bot.getApi().sendMessage(message->chat->id, 
+    //     "📔 Список команд бота:\n\n" 
+    //     "/start - Начать общение с ботом\n" 
+    //     "/help - Получить справку по командам\n" 
+    //     "/info - Получить информацию о боте"
+    //     );
+    // });
 
     // Обработка команды /info
-    bot.getEvents().onCommand("info", [this](TgBot::Message::Ptr message) {
-       bot.getApi().sendMessage(message->chat->id, 
-        "ℹ️ Бот предназначен для предоставления информации о криптовалюте, на данный моент находится на стадии разработки."
-        );
-    });
+    // bot.getEvents().onCommand("info", [this](TgBot::Message::Ptr message) {
+    //    bot.getApi().sendMessage(message->chat->id, 
+    //     "ℹ️ Бот предназначен для предоставления информации о криптовалюте, на данный моент находится на стадии разработки."
+    //     );
+    // });
 
     // Обработка остальных сообщений
     bot.getEvents().onAnyMessage([this](TgBot::Message::Ptr message) {
@@ -72,6 +72,7 @@ void Bot::start() {
 
         // Запуск long polling
         TgBot::TgLongPoll longPoll(bot);
+
         while (true) {
             fmt::print("[TICKER_PULSE_BOT]: Long poll started\n");
             longPoll.start();
@@ -112,7 +113,7 @@ void Bot::sendToGroup(const std::string& groupId, const std::string& messageText
 
 void Bot::onCallbackQuery(TgBot::CallbackQuery::Ptr callbackQuery) {
     if (callbackQuery->data == "ACTUAL") { 
-        std::vector<std::string> cryptoKeysVector;  // for request to CoinGecko
+        std::vector<std::string> cryptoKeysVector;  // для запросов к CoinGecko
 
         for (const auto& pair : cryptoMap) {
             cryptoKeysVector.push_back(pair.first);
@@ -127,7 +128,7 @@ void Bot::onCallbackQuery(TgBot::CallbackQuery::Ptr callbackQuery) {
             try {
                 for (const auto& [key, value] : result.items()) {
                     double usdValue = value.at("usd");
-                    answer = answer + "\n" + utils::capitalizeFirstLetter(key) + " " + cryptoMap[key] + ": " + utils::toFixedDouble(usdValue, 2) + " $";
+                    answer = answer + fmt::format("\n {}: {} $", cryptoMap[key], utils::toFixedDouble(usdValue, 2));
                 };
 
                 bot.getApi().sendMessage(callbackQuery->message->chat->id, answer);
@@ -162,43 +163,44 @@ TgBot::InlineKeyboardMarkup::Ptr Bot::createMainKeyboard() {
     button1->text = "📈 Курс ведущих валют";
     button1->callbackData = "ACTUAL";
 
-    TgBot::InlineKeyboardButton::Ptr button3(new TgBot::InlineKeyboardButton);
-    button3->text = "📔 Команды";
-    button3->callbackData = "ATIONS";
+    // TgBot::InlineKeyboardButton::Ptr button3(new TgBot::InlineKeyboardButton);
+    // button3->text = "📔 Команды";
+    // button3->callbackData = "ATIONS";
 
-    TgBot::InlineKeyboardButton::Ptr button4(new TgBot::InlineKeyboardButton);
-    button4->text = "ℹ️ Информация";
-    button4->callbackData = "INFO";
+    // TgBot::InlineKeyboardButton::Ptr button4(new TgBot::InlineKeyboardButton);
+    // button4->text = "ℹ️ Информация";
+    // button4->callbackData = "INFO";
 
     // Добавление кнопок в ряды
     keyboard->inlineKeyboard.push_back({button1});
-    keyboard->inlineKeyboard.push_back({button3, button4});
+    // keyboard->inlineKeyboard.push_back({button3, button4});
 
     return keyboard;
 };
 
 void Bot::setCurrencyLimites() {
     const std::map<std::string, std::vector<double>> updatedLimites;
+    const unsigned int interval = 20;
 
     for (const auto& [currencyName, symbol] : cryptoMap) {
         try {
             std::string url = fmt::format("https://api.coingecko.com/api/v3/coins/{}/market_chart?vs_currency=usd&days=7", currencyName);
             nlohmann::json result = fetcher.fetchCoinGecko(url);
+
             std::vector<double> minMaxValues = utils::findCurrencyMinMax(result["prices"]);
             limites[currencyName] = minMaxValues;
 
-            fmt::print("{}, min: {}, max: {}\n", currencyName, minMaxValues[0], minMaxValues[1]);
-
-            std::this_thread::sleep_for(std::chrono::seconds(5));
+            fmt::print("[TICKER_PULSE_BOT]: {}, min: {}, max: {}\n", currencyName, minMaxValues[0], minMaxValues[1]);
+            std::this_thread::sleep_for(std::chrono::seconds(interval));
         } catch (const std::exception& e) {
-            fmt::print("[TICKER_PULSE_BOT]: Error setting limites: {}\n", e.what());
+            fmt::print("[TICKER_PULSE_BOT]: [setCurrencyLimites]: Error setting limites: {}\n", e.what());
         };
     }
 };
 
 void Bot::checkLimitValuesAtInterval(const unsigned int seconds) {
-    std::this_thread::sleep_for(std::chrono::seconds(seconds));
-    std::vector<std::string> cryptoKeysVector;  // for request to CoinGecko
+    std::this_thread::sleep_for(std::chrono::seconds(seconds)); // первый sleep нужен чтобы подождать всех высчитывавений лимитов
+    std::vector<std::string> cryptoKeysVector;  // для запросов к CoinGecko
 
     for (const auto& pair : cryptoMap) {
         cryptoKeysVector.push_back(pair.first);
