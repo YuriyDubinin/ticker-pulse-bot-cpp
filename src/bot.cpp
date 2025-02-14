@@ -220,12 +220,12 @@ void Bot::checkLimitValuesAtInterval(const unsigned int seconds) {
                         const double& max = limites[key][1];
                         if (usdValue < min) {
                             message = fmt::format("⬇️ {} {}: {} $, это ниже минимальной цены за последние 7 дней! ({} $)", key, cryptoMap[key], utils::toFixedDouble(usdValue, 2), utils::toFixedDouble(min, 2));
-                            sendToGroup(GROUP_ID, message);
+                            sendToGroup(TELEGRAM_GROUP_ID, message);
                         }
 
                         if (usdValue > max) {
                             message = fmt::format("⬆️ {} {}: {} $, это выше максимальной цены за последние 7 дней! ({} $)", key, cryptoMap[key], utils::toFixedDouble(usdValue, 2), utils::toFixedDouble(max, 2));
-                            sendToGroup(GROUP_ID, message);
+                            sendToGroup(TELEGRAM_GROUP_ID, message);
                         }
                     }
                 };

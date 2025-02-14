@@ -72,7 +72,7 @@ These dependencies will be automatically installed via **vcpkg** during the setu
 6. **Prepare the config directory**:
    - It is necessary to create the "Configs" directory at the same level as src.
    - It should contain a configuration file config.h.
-   - To work correctly, they must contain the variables VERSION, TELEGRAM_BOT_API_KEY, GROUP_ID.
+   - To work correctly, they must contain the variables VERSION, TELEGRAM_BOT_API_KEY, TELEGRAM_GROUP_ID.
 
 7. **Configure the Project with CMake**:
    - Navigate to the project directory and configure the project:
