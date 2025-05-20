@@ -4,7 +4,7 @@
 int main() {
     fmt::print("[TICKER_PULSE_BOT]: started, version: {}\n", VERSION);
 
-    Bot bot(TELEGRAM_BOT_API_KEY, 4);
+    Bot bot(TELEGRAM_BOT_API_KEY, MAX_THREAD_COUNT);
 
     bot.start();
 

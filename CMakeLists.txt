@@ -1,8 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
 
-# Устанавливаем политику CMP0167 на NEW
-# cmake_policy(SET CMP0167 NEW)
-
 project(TickerPulseBot)
 
 # Стандарт C++ для проекта

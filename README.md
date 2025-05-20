@@ -1,4 +1,4 @@
-# ticker-pulse-bot-cpp v.1.0.0
+# ticker-pulse-bot-cpp v.1.0.1
 
 **ticker-pulse-bot** is a Telegram bot designed for monitoring cryptocurrency markets. The bot helps track specific cryptocurrencies and signals when predefined threshold values (minimums and maximums) are reached. It also provides real-time information about cryptocurrencies and their prices. This solution is perfect for anyone who wants to stay updated on the crypto market and receive notifications about significant changes.
 
@@ -51,28 +51,28 @@ These dependencies will be automatically installed via **vcpkg** during the setu
      ```
 
 4. **Install vcpkg**:
+   - ```git clone https://github.com/microsoft/vcpkg.git vcpkg```
+   - ```cd vcpkg```
    - Windows:
      ```bash
-     cd vcpkg
      .\bootstrap-vcpkg.bat
      ```
-   - Windows:
+   - Linux / MacOS:
      ```bash
-     cd vcpkg
      ./bootstrap-vcpkg.sh
      ```
-
 
 5. **Install Dependencies with vcpkg**:
    - Install the necessary libraries via vcpkg:
      ```bash
      cd vcpkg
-     ./vcpkg install fmt zlib openssl tgbot
+     ./vcpkg install fmt zlib openssl nlohmann-json tgbot-cpp
      ```
+
 6. **Prepare the config directory**:
-   - It is necessary to create the "Configs" directory at the same level as src.
-   - It should contain a configuration file config.h.
-   - To work correctly, they must contain the variables VERSION, TELEGRAM_BOT_API_KEY, TELEGRAM_GROUP_ID.
+   - It is necessary to create the "config" directory at the same level as src.
+   - It should contain a configuration file global_config.h.
+   - To work correctly, they must contain the variables VERSION, TELEGRAM_BOT_API_KEY, TELEGRAM_GROUP_ID, MAX_THREAD_COUNT, CHECK_LIMIT_INTERVAL.
 
 7. **Configure the Project with CMake**:
    - Navigate to the project directory and configure the project:
@@ -85,23 +85,17 @@ These dependencies will be automatically installed via **vcpkg** during the setu
 
    - This will configure the project and prepare it for compilation.
 
-8. **Build the Project**:
+9. **Build the Project**:
    - Run `make` to compile the bot:
      ```bash
      make
      ```
 
-9. **Run the Bot**:
+10. **Run the Bot**:
    - After successful compilation, you can run the bot using:
      ```bash
      ./TickerPulseBot
      ```
-
-### Directory Structure
-
-- **`CMakeLists.txt`**: The configuration file for building the project with CMake.
-- **`src/`**: Contains the source files for the project.
-- **`vcpkg/`**: Contains the vcpkg dependencies.
 
 Make sure to follow the steps above to properly set up the environment and dependencies for the bot to function correctly.
 
