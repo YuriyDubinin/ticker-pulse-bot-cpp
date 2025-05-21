@@ -28,9 +28,9 @@ std::map<std::string, std::string> Bot::cryptoMap = {
 
 void Bot::start() {
     // Обработка команды /start
-    bot.getEvents().onCommand("start", [this](TgBot::Message::Ptr message) {
-        onStartCommand(message);
-    });
+    // bot.getEvents().onCommand("start", [this](TgBot::Message::Ptr message) {
+    //     onStartCommand(message);
+    // });
 
     // Обработка команды /help
     // bot.getEvents().onCommand("help", [this](TgBot::Message::Ptr message) {
@@ -50,16 +50,19 @@ void Bot::start() {
     // });
 
     // Обработка остальных сообщений
-    bot.getEvents().onAnyMessage([this](TgBot::Message::Ptr message) {
-        // onAnyMessage(message);
-    });
+    // bot.getEvents().onAnyMessage([this](TgBot::Message::Ptr message) {
+    //     // onAnyMessage(message);
+    // });
 
     // Обработка callback-данных
-    bot.getEvents().onCallbackQuery([this](TgBot::CallbackQuery::Ptr callbackQuery) {
-        onCallbackQuery(callbackQuery);
-    });
+    // bot.getEvents().onCallbackQuery([this](TgBot::CallbackQuery::Ptr callbackQuery) {
+    //     onCallbackQuery(callbackQuery);
+    // });
 
     try {
+        const std::string startMessage = "🚀 Ticker Pulse Bot запущен..";
+        sendToGroup(TELEGRAM_GROUP_ID, startMessage);
+        
         fmt::print("[TICKER_PULSE_BOT]: TG username - {}\n", bot.getApi().getMe()->username);
 
         pool.enqueueTask([this]() {
@@ -72,9 +75,10 @@ void Bot::start() {
 
         // Запуск long polling
         TgBot::TgLongPoll longPoll(bot);
+        fmt::print("[TICKER_PULSE_BOT]: Long poll started\n");
 
         while (true) {
-            fmt::print("[TICKER_PULSE_BOT]: Long poll started\n");
+            // fmt::print("[TICKER_PULSE_BOT]: Long poll started\n");
             longPoll.start();
         }
     } catch (TgBot::TgException& e) {
@@ -179,6 +183,8 @@ TgBot::InlineKeyboardMarkup::Ptr Bot::createMainKeyboard() {
 };
 
 void Bot::setCurrencyLimites() {
+    fmt::print("[TICKER_PULSE_BOT]: setCurrencyLimites started\n");
+
     const std::map<std::string, std::vector<double>> updatedLimites;
     const unsigned int interval = 20;
 
