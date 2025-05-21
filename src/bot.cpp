@@ -10,10 +10,10 @@
 #include "utils.h"
 #include "thread_pool.h"
 
-Bot::Bot(const std::string& token, int threadCount)
-    : bot(token), pool(threadCount), fetcher() {};
+Bot::Bot(const std::string& token, int threads_count)
+    : bot(token), pool(threads_count), fetcher() {};
 
-std::map<std::string, std::string> Bot::cryptoMap = {
+std::map<std::string, std::string> Bot::crypto_map = {
     {"bitcoin", "Bitcoin (BTC)"},
     {"ethereum", "Etherium (ETH)"},
     {"tether", "Tether ERC-20 (USDT)"},
@@ -29,7 +29,7 @@ std::map<std::string, std::string> Bot::cryptoMap = {
 void Bot::start() {
     // Обработка команды /start
     // bot.getEvents().onCommand("start", [this](TgBot::Message::Ptr message) {
-    //     onStartCommand(message);
+    //     on_start_command(message);
     // });
 
     // Обработка команды /help
@@ -50,27 +50,27 @@ void Bot::start() {
     // });
 
     // Обработка остальных сообщений
-    // bot.getEvents().onAnyMessage([this](TgBot::Message::Ptr message) {
-    //     // onAnyMessage(message);
+    // bot.getEvents().on_any_message([this](TgBot::Message::Ptr message) {
+    //     // on_any_message(message);
     // });
 
     // Обработка callback-данных
-    // bot.getEvents().onCallbackQuery([this](TgBot::CallbackQuery::Ptr callbackQuery) {
-    //     onCallbackQuery(callbackQuery);
+    // bot.getEvents().on_callback_query([this](TgBot::CallbackQuery::Ptr callback_query) {
+    //     on_callback_query(callback_query);
     // });
 
     try {
-        const std::string startMessage = "🚀 Ticker Pulse Bot запущен..";
-        sendToGroup(TELEGRAM_GROUP_ID, startMessage);
+        const std::string start_chat_message = "🚀 Ticker Pulse Bot запущен..";
+        send_to_group(TELEGRAM_GROUP_ID, start_chat_message);
         
         fmt::print("[TICKER_PULSE_BOT]: TG username - {}\n", bot.getApi().getMe()->username);
 
-        pool.enqueueTask([this]() {
-            setCurrencyLimites();
+        pool.enqueue_task([this]() {
+            set_currency_limites();
         });
 
-        pool.enqueueTask([this]() {
-            checkLimitValuesAtInterval(CHECK_LIMIT_INTERVAL);
+        pool.enqueue_task([this]() {
+            check_limit_values_at_interval(CHECK_LIMIT_INTERVAL);
         });
 
         // Запуск long polling
@@ -86,12 +86,12 @@ void Bot::start() {
     };
 };
 
-void Bot::onStartCommand(TgBot::Message::Ptr message) {
-    TgBot::InlineKeyboardMarkup::Ptr mainKeyboard = createMainKeyboard();
-    bot.getApi().sendMessage(message->chat->id, "📊 Привет! Я отслеживаю курсы криптовалют. 🚀", false, 0, mainKeyboard);
+void Bot::on_start_command(TgBot::Message::Ptr message) {
+    TgBot::InlineKeyboardMarkup::Ptr main_keyboard = create_main_keyboard();
+    bot.getApi().sendMessage(message->chat->id, "📊 Привет! Я отслеживаю курсы криптовалют. 🚀", false, 0, main_keyboard);
 };
 
-void Bot::onAnyMessage(TgBot::Message::Ptr message) {
+void Bot::on_any_message(TgBot::Message::Ptr message) {
     fmt::print("[TICKER_PULSE_BOT]: [CHAT]: {}\n", message->text);
 
     if (
@@ -106,60 +106,60 @@ void Bot::onAnyMessage(TgBot::Message::Ptr message) {
     }
 };
 
-void Bot::sendToGroup(const std::string& groupId, const std::string& messageText) {
+void Bot::send_to_group(const std::string& group_id, const std::string& message_text) {
     try {
-        bot.getApi().sendMessage(groupId, messageText);
-        fmt::print("[TICKER_PULSE_BOT]: Message sent to group {}\n", groupId);
+        bot.getApi().sendMessage(group_id, message_text);
+        fmt::print("[TICKER_PULSE_BOT]: Message sent to group {}\n", group_id);
     } catch (TgBot::TgException& e) {
-        fmt::print("[TICKER_PULSE_BOT]: Failed to send message to group {}: {}\n", groupId, e.what());
+        fmt::print("[TICKER_PULSE_BOT]: Failed to send message to group {}: {}\n", group_id, e.what());
     };
 };
 
-void Bot::onCallbackQuery(TgBot::CallbackQuery::Ptr callbackQuery) {
-    if (callbackQuery->data == "ACTUAL") { 
-        std::vector<std::string> cryptoKeysVector;  // для запросов к CoinGecko
+void Bot::on_callback_query(TgBot::CallbackQuery::Ptr callback_query) {
+    if (callback_query->data == "ACTUAL") { 
+        std::vector<std::string> crypto_keys_vector;  // для запросов к CoinGecko
 
-        for (const auto& pair : cryptoMap) {
-            cryptoKeysVector.push_back(pair.first);
+        for (const auto& pair : crypto_map) {
+            crypto_keys_vector.push_back(pair.first);
         };
 
-        std::string currenciesString = utils::stringifyStringsVectorToString(cryptoKeysVector, ",");
-        std::string url = "https://api.coingecko.com/api/v3/simple/price?ids=" + currenciesString + "&vs_currencies=usd";
-        nlohmann::json result = fetcher.fetchCoinGecko(url);
+        std::string currencies_string = utils::stringify_strings_vector_to_string(crypto_keys_vector, ",");
+        std::string url = "https://api.coingecko.com/api/v3/simple/price?ids=" + currencies_string + "&vs_currencies=usd";
+        nlohmann::json result = fetcher.fetch_coingecko(url);
         std::string answer = "📈 Актуальный курс\nведущих криптовалют: \n";
 
         if (!result.empty()) {
             try {
                 for (const auto& [key, value] : result.items()) {
                     double usdValue = value.at("usd");
-                    answer = answer + fmt::format("\n {}: {} $", cryptoMap[key], utils::toFixedDouble(usdValue, 2));
+                    answer = answer + fmt::format("\n {}: {} $", crypto_map[key], utils::to_fixed_double(usdValue, 2));
                 };
 
-                bot.getApi().sendMessage(callbackQuery->message->chat->id, answer);
+                bot.getApi().sendMessage(callback_query->message->chat->id, answer);
             } catch (const nlohmann::json::exception& e) {
-                bot.getApi().sendMessage(callbackQuery->message->chat->id, "⌛ Я загружен, скоро освобожусь.");
+                bot.getApi().sendMessage(callback_query->message->chat->id, "⌛ Я загружен, скоро освобожусь.");
                 fmt::print(stderr, "[TICKER_PULSE_BOT]: Error when retrieving data from JSON: {}\n", e.what());
             }
         } else {
             fmt::print(stderr, "[TICKER_PULSE_BOT]: Error while receiving data\n");
         }
-    } else if (callbackQuery->data == "SELECT_CURRENCY") {
-        bot.getApi().sendMessage(callbackQuery->message->chat->id, "Вызов меню выбора криптовалюты");
-    } else if (callbackQuery->data == "ATIONS") {
-        bot.getApi().sendMessage(callbackQuery->message->chat->id, 
+    } else if (callback_query->data == "SELECT_CURRENCY") {
+        bot.getApi().sendMessage(callback_query->message->chat->id, "Вызов меню выбора криптовалюты");
+    } else if (callback_query->data == "ATIONS") {
+        bot.getApi().sendMessage(callback_query->message->chat->id, 
             "📔 Список команд бота:\n\n" 
             "/start - Начать общение с ботом\n" 
             "/help - Получить справку по командам\n" 
             "/info - Получить информацию о боте"
         );
-    } else if (callbackQuery->data == "INFO") {
-        bot.getApi().sendMessage(callbackQuery->message->chat->id, 
+    } else if (callback_query->data == "INFO") {
+        bot.getApi().sendMessage(callback_query->message->chat->id, 
             "ℹ️ Бот предназначен для предоставления информации о криптовалюте, на данный моент находится на стадии разработки."
         );
     }
 };
 
-TgBot::InlineKeyboardMarkup::Ptr Bot::createMainKeyboard() {
+TgBot::InlineKeyboardMarkup::Ptr Bot::create_main_keyboard() {
     TgBot::InlineKeyboardMarkup::Ptr keyboard(new TgBot::InlineKeyboardMarkup);
 
     // Создание кнопок
@@ -182,41 +182,41 @@ TgBot::InlineKeyboardMarkup::Ptr Bot::createMainKeyboard() {
     return keyboard;
 };
 
-void Bot::setCurrencyLimites() {
-    fmt::print("[TICKER_PULSE_BOT]: setCurrencyLimites started\n");
+void Bot::set_currency_limites() {
+    fmt::print("[TICKER_PULSE_BOT]: set_currency_limites started\n");
 
-    const std::map<std::string, std::vector<double>> updatedLimites;
+    const std::map<std::string, std::vector<double>> updated_limites;
     const unsigned int interval = 20;
 
-    for (const auto& [currencyName, symbol] : cryptoMap) {
+    for (const auto& [currency_name, symbol] : crypto_map) {
         try {
-            std::string url = fmt::format("https://api.coingecko.com/api/v3/coins/{}/market_chart?vs_currency=usd&days=7", currencyName);
-            nlohmann::json result = fetcher.fetchCoinGecko(url);
+            std::string url = fmt::format("https://api.coingecko.com/api/v3/coins/{}/market_chart?vs_currency=usd&days=7", currency_name);
+            nlohmann::json result = fetcher.fetch_coingecko(url);
 
-            std::vector<double> minMaxValues = utils::findCurrencyMinMax(result["prices"]);
-            limites[currencyName] = minMaxValues;
+            std::vector<double> min_max_values = utils::find_currency_min_max(result["prices"]);
+            limites[currency_name] = min_max_values;
 
-            fmt::print("[TICKER_PULSE_BOT]: {}, min: {}, max: {}\n", currencyName, minMaxValues[0], minMaxValues[1]);
+            fmt::print("[TICKER_PULSE_BOT]: {}, min: {}, max: {}\n", currency_name, min_max_values[0], min_max_values[1]);
             std::this_thread::sleep_for(std::chrono::seconds(interval));
         } catch (const std::exception& e) {
-            fmt::print("[TICKER_PULSE_BOT]: [setCurrencyLimites]: Error setting limites: {}\n", e.what());
+            fmt::print("[TICKER_PULSE_BOT]: [set_currency_limites]: Error setting limites: {}\n", e.what());
         };
     }
 };
 
-void Bot::checkLimitValuesAtInterval(const unsigned int seconds) {
+void Bot::check_limit_values_at_interval(const unsigned int seconds) {
     std::this_thread::sleep_for(std::chrono::seconds(seconds)); // первый sleep нужен чтобы подождать всех высчитывавений лимитов
-    std::vector<std::string> cryptoKeysVector;  // для запросов к CoinGecko
+    std::vector<std::string> crypto_keys_vector;  // для запросов к CoinGecko
 
-    for (const auto& pair : cryptoMap) {
-        cryptoKeysVector.push_back(pair.first);
+    for (const auto& pair : crypto_map) {
+        crypto_keys_vector.push_back(pair.first);
     };
     
-    std::string currenciesString = utils::stringifyStringsVectorToString(cryptoKeysVector, ",");
-    std::string url = "https://api.coingecko.com/api/v3/simple/price?ids=" + currenciesString + "&vs_currencies=usd";
+    std::string currencies_string = utils::stringify_strings_vector_to_string(crypto_keys_vector, ",");
+    std::string url = "https://api.coingecko.com/api/v3/simple/price?ids=" + currencies_string + "&vs_currencies=usd";
 
     while (true) {
-        nlohmann::json result = fetcher.fetchCoinGecko(url);
+        nlohmann::json result = fetcher.fetch_coingecko(url);
 
         if (!result.empty()) {
             try {
@@ -226,19 +226,20 @@ void Bot::checkLimitValuesAtInterval(const unsigned int seconds) {
                         double usdValue = value.at("usd");
                         const double& min = limites[key][0];
                         const double& max = limites[key][1];
+                        
                         if (usdValue < min) {
-                            message = fmt::format("⬇️ {} {}: {} $, это ниже минимальной цены за последние 7 дней! ({} $)", key, cryptoMap[key], utils::toFixedDouble(usdValue, 2), utils::toFixedDouble(min, 2));
-                            sendToGroup(TELEGRAM_GROUP_ID, message);
+                            message = fmt::format("⬇️ {} {}: {} $, это ниже минимальной цены за последние 7 дней! ({} $)", key, crypto_map[key], utils::to_fixed_double(usdValue, 2), utils::to_fixed_double(min, 2));
+                            send_to_group(TELEGRAM_GROUP_ID, message);
                         }
 
                         if (usdValue > max) {
-                            message = fmt::format("⬆️ {} {}: {} $, это выше максимальной цены за последние 7 дней! ({} $)", key, cryptoMap[key], utils::toFixedDouble(usdValue, 2), utils::toFixedDouble(max, 2));
-                            sendToGroup(TELEGRAM_GROUP_ID, message);
+                            message = fmt::format("⬆️ {} {}: {} $, это выше максимальной цены за последние 7 дней! ({} $)", key, crypto_map[key], utils::to_fixed_double(usdValue, 2), utils::to_fixed_double(max, 2));
+                            send_to_group(TELEGRAM_GROUP_ID, message);
                         }
                     }
                 };
             } catch (const std::exception& e) {
-                fmt::print("[TICKER_PULSE_BOT]: [checkLimitValuesAtInterval]: Error sending message to group: {}\n", e.what());
+                fmt::print("[TICKER_PULSE_BOT]: [check_limit_values_at_interval]: Error sending message to group: {}\n", e.what());
             };
         }
 

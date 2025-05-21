@@ -12,22 +12,22 @@
 
 class Bot {
     public:
-        Bot(const std::string& token, int threadCount);
+        Bot(const std::string& token, int threads_count);
         void start();
 
     private:
-        static std::map<std::string, std::string> cryptoMap;
+        static std::map<std::string, std::string> crypto_map;
         TgBot::Bot bot;
         ThreadPool pool;
         CryptoFetcher fetcher;
         std::map<std::string, std::vector<double>> limites;
-        TgBot::InlineKeyboardMarkup::Ptr createMainKeyboard();
-        void onStartCommand(TgBot::Message::Ptr message);
-        void onAnyMessage(TgBot::Message::Ptr message);
-        void sendToGroup(const std::string& groupId, const std::string& messageText);
-        void onCallbackQuery(TgBot::CallbackQuery::Ptr callbackQuery);
-        void setCurrencyLimites();
-        void checkLimitValuesAtInterval(const unsigned int seconds);
+        TgBot::InlineKeyboardMarkup::Ptr create_main_keyboard();
+        void on_start_command(TgBot::Message::Ptr message);
+        void on_any_message(TgBot::Message::Ptr message);
+        void send_to_group(const std::string& group_id, const std::string& message_text);
+        void on_callback_query(TgBot::CallbackQuery::Ptr callback_query);
+        void set_currency_limites();
+        void check_limit_values_at_interval(const unsigned int seconds);
 };
 
 #endif

@@ -5,7 +5,7 @@
 #include "utils.h"
 
 namespace utils {
-    std::string toFixedDouble(double value, int precision) {
+    std::string to_fixed_double(double value, int precision) {
         std::ostringstream oss;
         oss << std::fixed << std::setprecision(precision) << value;
         std::string result = oss.str();
@@ -13,21 +13,21 @@ namespace utils {
         return result;
     };
 
-    std::string stringifyStringsVectorToString(const std::vector<std::string>& stringVector, std::string delimiter) {
+    std::string stringify_strings_vector_to_string(const std::vector<std::string>& string_vector, std::string delimiter) {
         std::string result;
         
-        for (size_t i = 0; i < stringVector.size(); ++i) {
+        for (size_t i = 0; i < string_vector.size(); ++i) {
             if (i > 0) {
                 result += delimiter;  // Добавляем разделитель перед каждым элементом, кроме первого
             }
             
-            result += stringVector[i];
+            result += string_vector[i];
         }
         
         return result;
     };
 
-    std::string capitalizeFirstLetter(const std::string string) {
+    std::string capitalize_first_letter(const std::string string) {
         if (string.empty()) {
             return string;
         };
@@ -38,7 +38,7 @@ namespace utils {
         return result;
     };
 
-    std::vector<double> findCurrencyMinMax(const std::vector<std::vector<double>>& data) {
+    std::vector<double> find_currency_min_max(const std::vector<std::vector<double>>& data) {
         double minVal = data[0][1];
         double maxVal = data[0][1];
 

@@ -10,7 +10,7 @@ class NewsFetcher {
         explicit NewsFetcher();
         ~NewsFetcher();
 
-        nlohmann::json fetchCoinGecko(const std::string& url);
+        nlohmann::json fetch_coingecko(const std::string& url);
 };
 
 #endif

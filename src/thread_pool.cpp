@@ -1,22 +1,22 @@
 #include "thread_pool.h"
 
-ThreadPool::ThreadPool(size_t numThreads) : stopFlag(false) {
-    for (size_t i = 0; i < numThreads; i++) {
+ThreadPool::ThreadPool(size_t threads_count) : stop_flag(false) {
+    for (size_t i = 0; i < threads_count; i++) {
         workers.emplace_back([this]() {
             while (true) {
                 std::function<void()> task;
                 {
-                    std::unique_lock<std::mutex> lock(queueMutex);
+                    std::unique_lock<std::mutex> lock(queue_mutex);
                     cv.wait(lock, [this]() {
-                        return stopFlag || !taskQueue.empty();
+                        return stop_flag || !task_queue.empty();
                     });
 
-                    if (stopFlag && taskQueue.empty()) {
+                    if (stop_flag && task_queue.empty()) {
                         return;
                     }
 
-                    task = std::move(taskQueue.front());
-                    taskQueue.pop();
+                    task = std::move(task_queue.front());
+                    task_queue.pop();
                 }
 
                 task();
@@ -26,15 +26,15 @@ ThreadPool::ThreadPool(size_t numThreads) : stopFlag(false) {
 };
 
 ThreadPool::~ThreadPool() {
-    if (stopFlag) {
+    if (stop_flag) {
         stop();
     }
 };
 
-void ThreadPool::enqueueTask(std::function<void()> task) {
+void ThreadPool::enqueue_task(std::function<void()> task) {
     {
-        std::unique_lock<std::mutex> lock(queueMutex);
-        taskQueue.push(std::move(task));
+        std::unique_lock<std::mutex> lock(queue_mutex);
+        task_queue.push(std::move(task));
     }
     
     cv.notify_one();
@@ -42,8 +42,8 @@ void ThreadPool::enqueueTask(std::function<void()> task) {
 
 void ThreadPool::stop() {
     {
-        std::unique_lock<std::mutex> lock(queueMutex);
-        stopFlag = true;
+        std::unique_lock<std::mutex> lock(queue_mutex);
+        stop_flag = true;
     }
 
     cv.notify_all();
