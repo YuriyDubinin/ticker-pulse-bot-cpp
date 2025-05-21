@@ -33,7 +33,9 @@ The following libraries are required to run the bot:
 1. **fmt**: A modern C++ formatting library.
 2. **ZLIB**: A compression library required for some of the dependencies.
 3. **OpenSSL**: A toolkit for implementing secure communication protocols.
-4. **Telegram Bot API**: The bot uses a static library for interacting with Telegram. This is included via the `libTgBot.a` file built by vcpkg.
+4. **CURL**: A library for transferring data with URLs, supporting a wide range of protocols (HTTP, HTTPS, FTP, etc.).
+5. **nlohmann_json**: A header-only library for working with JSON in a modern and intuitive C++ style.
+6. **Telegram Bot API**: The bot uses a static library for interacting with Telegram. This is included via the `libTgBot.a` file built by vcpkg.
 
 These dependencies will be automatically installed via **vcpkg** during the setup process.
 
@@ -51,14 +53,16 @@ These dependencies will be automatically installed via **vcpkg** during the setu
      ```
 
 4. **Install vcpkg**:
-   - ```git clone https://github.com/microsoft/vcpkg.git vcpkg```
-   - ```cd vcpkg```
    - Windows:
      ```bash
+     git clone https://github.com/microsoft/vcpkg.git vcpkg
+     cd vcpkg
      .\bootstrap-vcpkg.bat
      ```
    - Linux / MacOS:
      ```bash
+     git clone https://github.com/microsoft/vcpkg.git vcpkg
+     cd vcpkg
      ./bootstrap-vcpkg.sh
      ```
 
