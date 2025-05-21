@@ -1,5 +1,5 @@
-#ifndef NEWS_FETCHER
-#define NEWS_FETCHER
+#ifndef NEWS_FETCHER_H
+#define NEWS_FETCHER_H
 
 #include <string>
 #include <curl/curl.h>
@@ -10,7 +10,10 @@ class NewsFetcher {
         explicit NewsFetcher();
         ~NewsFetcher();
 
-        nlohmann::json fetch_coingecko(const std::string& url);
+        nlohmann::json fetch_news(const std::string& url);
+    
+    private:
+        static size_t write_callback(void* contents, size_t size, size_t nmemb, void* userp);
 };
 
 #endif

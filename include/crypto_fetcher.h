@@ -1,5 +1,5 @@
-#ifndef CRYPTO_FETCHER
-#define CRYPTO_FETCHER
+#ifndef CRYPTO_FETCHER_H
+#define CRYPTO_FETCHER_H
 
 #include <string>
 #include <curl/curl.h>

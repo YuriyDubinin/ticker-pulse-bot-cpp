@@ -7,11 +7,12 @@
 #include "global_config.h"
 #include "bot.h"
 #include "crypto_fetcher.h"
+#include "news_fetcher.h"
 #include "utils.h"
 #include "thread_pool.h"
 
 Bot::Bot(const std::string& token, int threads_count)
-    : bot(token), pool(threads_count), fetcher() {};
+    : bot(token), pool(threads_count), crypto_fetcher(), news_fetcher() {};
 
 std::map<std::string, std::string> Bot::crypto_map = {
     {"bitcoin", "Bitcoin (BTC)"},
@@ -65,12 +66,16 @@ void Bot::start() {
         
         fmt::print("[TICKER_PULSE_BOT]: TG username - {}\n", bot.getApi().getMe()->username);
 
-        pool.enqueue_task([this]() {
-            set_currency_limites();
-        });
+        // pool.enqueue_task([this]() {
+        //     set_currency_limites();
+        // });
+
+        // pool.enqueue_task([this]() {
+        //     check_limit_values_by_interval(CHECK_CURRENCIES_LIMIT_INTERVAL);
+        // });
 
         pool.enqueue_task([this]() {
-            check_limit_values_at_interval(CHECK_LIMIT_INTERVAL);
+            publish_news_by_interval(PUBLISH_NEWS_INTERVAL);
         });
 
         // Запуск long polling
@@ -125,7 +130,7 @@ void Bot::on_callback_query(TgBot::CallbackQuery::Ptr callback_query) {
 
         std::string currencies_string = utils::stringify_strings_vector_to_string(crypto_keys_vector, ",");
         std::string url = "https://api.coingecko.com/api/v3/simple/price?ids=" + currencies_string + "&vs_currencies=usd";
-        nlohmann::json result = fetcher.fetch_coingecko(url);
+        nlohmann::json result = crypto_fetcher.fetch_coingecko(url);
         std::string answer = "📈 Актуальный курс\nведущих криптовалют: \n";
 
         if (!result.empty()) {
@@ -191,7 +196,7 @@ void Bot::set_currency_limites() {
     for (const auto& [currency_name, symbol] : crypto_map) {
         try {
             std::string url = fmt::format("https://api.coingecko.com/api/v3/coins/{}/market_chart?vs_currency=usd&days=7", currency_name);
-            nlohmann::json result = fetcher.fetch_coingecko(url);
+            nlohmann::json result = crypto_fetcher.fetch_coingecko(url);
 
             std::vector<double> min_max_values = utils::find_currency_min_max(result["prices"]);
             limites[currency_name] = min_max_values;
@@ -204,7 +209,7 @@ void Bot::set_currency_limites() {
     }
 };
 
-void Bot::check_limit_values_at_interval(const unsigned int seconds) {
+void Bot::check_limit_values_by_interval(const unsigned int seconds) {
     std::this_thread::sleep_for(std::chrono::seconds(seconds)); // первый sleep нужен чтобы подождать всех высчитывавений лимитов
     std::vector<std::string> crypto_keys_vector;  // для запросов к CoinGecko
 
@@ -216,7 +221,7 @@ void Bot::check_limit_values_at_interval(const unsigned int seconds) {
     std::string url = "https://api.coingecko.com/api/v3/simple/price?ids=" + currencies_string + "&vs_currencies=usd";
 
     while (true) {
-        nlohmann::json result = fetcher.fetch_coingecko(url);
+        nlohmann::json result = crypto_fetcher.fetch_coingecko(url);
 
         if (!result.empty()) {
             try {
@@ -239,7 +244,7 @@ void Bot::check_limit_values_at_interval(const unsigned int seconds) {
                     }
                 };
             } catch (const std::exception& e) {
-                fmt::print("[TICKER_PULSE_BOT]: [check_limit_values_at_interval]: Error sending message to group: {}\n", e.what());
+                fmt::print("[TICKER_PULSE_BOT]: [check_limit_values_by_interval]: Error sending message to group: {}\n", e.what());
             };
         }
 
@@ -247,3 +252,25 @@ void Bot::check_limit_values_at_interval(const unsigned int seconds) {
     }
 };
 
+void Bot::publish_news_by_interval(const unsigned int seconds) {
+    std::string url = "https://newsdata.io/api/1/latest?apikey=" + NEWS_API_KEY + "&q=криптовалюта&language=ru&size=1";
+
+    while (true) {
+        nlohmann::json result = news_fetcher.fetch_news(url);
+
+        try {
+            nlohmann::json article = result["results"][0];
+
+            std::string title = article.value("title", "Без заголовка");
+            std::string description = article.value("description", "Нет описания");
+            std::string link = article.value("link", "Нет ссылки");
+            std::string message = fmt::format("{}.\n{} @ticker_pulse\n\n🔗{}", title, description, link);
+
+            send_to_group(TELEGRAM_GROUP_ID, message);
+        } catch (const std::exception& e) {
+            fmt::print("[TICKER_PULSE_BOT]: [publish_news_by_interval]: Error sending message to group: {}\n", e.what());
+        }
+
+        std::this_thread::sleep_for(std::chrono::seconds(seconds));
+    }
+}

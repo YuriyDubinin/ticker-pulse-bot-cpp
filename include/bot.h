@@ -8,6 +8,7 @@
 #include <vector>
 #include "thread_pool.h"
 #include "crypto_fetcher.h"
+#include "news_fetcher.h"
 
 
 class Bot {
@@ -19,7 +20,8 @@ class Bot {
         static std::map<std::string, std::string> crypto_map;
         TgBot::Bot bot;
         ThreadPool pool;
-        CryptoFetcher fetcher;
+        CryptoFetcher crypto_fetcher;
+        NewsFetcher news_fetcher;
         std::map<std::string, std::vector<double>> limites;
         TgBot::InlineKeyboardMarkup::Ptr create_main_keyboard();
         void on_start_command(TgBot::Message::Ptr message);
@@ -27,7 +29,8 @@ class Bot {
         void send_to_group(const std::string& group_id, const std::string& message_text);
         void on_callback_query(TgBot::CallbackQuery::Ptr callback_query);
         void set_currency_limites();
-        void check_limit_values_at_interval(const unsigned int seconds);
+        void check_limit_values_by_interval(const unsigned int seconds);
+        void publish_news_by_interval(const unsigned int seconts);
 };
 
 #endif

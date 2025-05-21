@@ -32,6 +32,7 @@ add_executable(TickerPulseBot
     "${CMAKE_SOURCE_DIR}/src/thread_pool.cpp"
     "${CMAKE_SOURCE_DIR}/src/bot.cpp"
     "${CMAKE_SOURCE_DIR}/src/crypto_fetcher.cpp"
+    "${CMAKE_SOURCE_DIR}/src/news_fetcher.cpp"
     "${CMAKE_SOURCE_DIR}/src/utils.cpp"
 )
 
