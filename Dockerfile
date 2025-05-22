@@ -1,14 +1,10 @@
-# FROM ubuntu:22.04
-FROM --platform=linux/amd64 ubuntu:22.04
+# ---- Этап 1: Build ----
+FROM --platform=linux/amd64 ubuntu:22.04 AS build
 
-# Установка необходимых зависимостей для системы
 RUN apt-get update && apt-get install -y \
     build-essential \
     g++-11 \
     curl \
-    zip \
-    unzip \
-    tar \
     git \
     cmake \
     ninja-build \
@@ -18,22 +14,36 @@ RUN apt-get update && apt-get install -y \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
-COPY . .
 
-# Настройка vcpkg
+# Клонирование и билд vcpkg
 RUN git clone https://github.com/microsoft/vcpkg.git vcpkg
 WORKDIR /app/vcpkg
 RUN ./bootstrap-vcpkg.sh
 
-# Установка зависимостей через vcpkg
-RUN ./vcpkg install fmt zlib openssl nlohmann-json curl tgbot-cpp
+# Копирование только исходников и CMakeLists.txt
+WORKDIR /app
+COPY . .
 
-# Создание директории для сборки
+# Установка зависимостей с помощью vcpkg
+RUN /app/vcpkg/vcpkg install fmt zlib openssl nlohmann-json curl tgbot-cpp
+
+# Собираем проект
 WORKDIR /app/build
-
-# Сборка проекта с использованием CMake и toolchain vcpkg
-RUN cmake .. -DCMAKE_TOOLCHAIN_FILE=/app/vcpkg/scripts/buildsystems/vcpkg.cmake
+RUN cmake .. -DCMAKE_TOOLCHAIN_FILE=/app/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_BUILD_TYPE=Release
 RUN make
 
-# Определение команды для запуска бота
+# ---- Этап 2: Runtime ----
+FROM --platform=linux/amd64 ubuntu:22.04
+
+# Установка минимальных зависимостей
+RUN apt-get update && apt-get install -y \
+    libssl3 \
+    ca-certificates && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Копирование бинарника из билд-этапа
+COPY --from=build /app/build/TickerPulseBot .
+
 CMD ["./TickerPulseBot"]
