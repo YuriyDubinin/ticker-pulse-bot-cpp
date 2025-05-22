@@ -2,46 +2,69 @@ cmake_minimum_required(VERSION 3.10)
 
 project(TickerPulseBot)
 
-# Стандарт C++ для проекта
+# Стандарт C++
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Путь к файлу toolchain для vcpkg
-set(CMAKE_TOOLCHAIN_FILE "${CMAKE_SOURCE_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE STRING "Vcpkg toolchain file")
+# Подключение toolchain-файла vcpkg
+set(CMAKE_TOOLCHAIN_FILE "${CMAKE_SOURCE_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake"
+    CACHE STRING "Vcpkg toolchain file")
 
-# Путь поиска пакетов 
-list(APPEND CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/vcpkg/installed/arm64-osx/share")
+# Определение платформы
+if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    set(VCPKG_TARGET_TRIPLET "arm64-osx")
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    set(VCPKG_TARGET_TRIPLET "x64-linux")
+else()
+    message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
+endif()
 
-# Зависимости
+# Пути поиска пакетов
+set(VCPKG_INSTALLED_PATH "${CMAKE_SOURCE_DIR}/vcpkg/installed/${VCPKG_TARGET_TRIPLET}")
+list(APPEND CMAKE_PREFIX_PATH "${VCPKG_INSTALLED_PATH}/share")
+include_directories("${VCPKG_INSTALLED_PATH}/include")
+
+# Поиск зависимостей
 find_package(fmt REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(nlohmann_json REQUIRED)
 find_package(CURL REQUIRED)
-find_library(TGBOT_CPP_LIB TgBot HINTS "${CMAKE_SOURCE_DIR}/vcpkg/installed/arm64-osx/lib")
 
+# Поиск библиотеки tgbot-cpp вручную
+find_library(TGBOT_CPP_LIB
+    NAMES TgBot
+    PATHS "${VCPKG_INSTALLED_PATH}/lib"
+)
+
+if(NOT TGBOT_CPP_LIB)
+    message(FATAL_ERROR "tgbot-cpp (TgBot) library not found in ${VCPKG_INSTALLED_PATH}/lib")
+endif()
 
 # Заголовочные файлы
-include_directories(src)
-include_directories("${CMAKE_SOURCE_DIR}/vcpkg/installed/arm64-osx/include")
-include_directories("${CMAKE_SOURCE_DIR}/config")
-include_directories("${CMAKE_SOURCE_DIR}/include")
-include_directories("${CMAKE_SOURCE_DIR}/src")
-include_directories("${CMAKE_SOURCE_DIR}/vcpkg")
+include_directories(
+    "${CMAKE_SOURCE_DIR}/src"
+    "${CMAKE_SOURCE_DIR}/include"
+    "${CMAKE_SOURCE_DIR}/config"
+)
 
 # Исходные файлы
 add_executable(TickerPulseBot
-    "${CMAKE_SOURCE_DIR}/src/main.cpp"
-    "${CMAKE_SOURCE_DIR}/src/thread_pool.cpp"
-    "${CMAKE_SOURCE_DIR}/src/bot.cpp"
-    "${CMAKE_SOURCE_DIR}/src/crypto_fetcher.cpp"
-    "${CMAKE_SOURCE_DIR}/src/news_fetcher.cpp"
-    "${CMAKE_SOURCE_DIR}/src/utils.cpp"
+    src/main.cpp
+    src/thread_pool.cpp
+    src/bot.cpp
+    src/crypto_fetcher.cpp
+    src/news_fetcher.cpp
+    src/utils.cpp
 )
 
-# Линк зависимостей с проектом
-target_link_libraries(TickerPulseBot fmt::fmt)
-target_link_libraries(TickerPulseBot ZLIB::ZLIB)
-target_link_libraries(TickerPulseBot OpenSSL::SSL OpenSSL::Crypto)
-target_link_libraries(TickerPulseBot nlohmann_json::nlohmann_json)
-target_link_libraries(TickerPulseBot CURL::libcurl)
-target_link_libraries(TickerPulseBot ${TGBOT_CPP_LIB})
+# Линковка зависимостей
+target_link_libraries(TickerPulseBot
+    fmt::fmt
+    ZLIB::ZLIB
+    OpenSSL::SSL
+    OpenSSL::Crypto
+    nlohmann_json::nlohmann_json
+    CURL::libcurl
+    ${TGBOT_CPP_LIB}
+)
