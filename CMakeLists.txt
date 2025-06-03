@@ -53,8 +53,6 @@ add_executable(TickerPulseBot
     src/main.cpp
     src/thread_pool.cpp
     src/bot.cpp
-    src/crypto_fetcher.cpp
-    src/news_fetcher.cpp
     src/http_client.cpp
     src/utils.cpp
 )

@@ -3,16 +3,14 @@
 #include <fmt/core.h>
 #include <chrono>
 #include <thread>
-#include "bot.h"
 #include "global_config.h"
 #include "bot.h"
-#include "crypto_fetcher.h"
-#include "news_fetcher.h"
+#include "http_client.h"
 #include "utils.h"
 #include "thread_pool.h"
 
 Bot::Bot(const std::string& token, int threads_count)
-    : bot(token), pool(threads_count), crypto_fetcher(), news_fetcher() {};
+    : bot(token), pool(threads_count), http_client() {};
 
 std::map<std::string, std::string> Bot::crypto_map = {
     {"bitcoin", "Bitcoin (BTC)"},
@@ -66,13 +64,13 @@ void Bot::start() {
         
         fmt::print("[TICKER_PULSE_BOT]: TG username - {}\n", bot.getApi().getMe()->username);
 
-        // pool.enqueue_task([this]() {
-        //     set_currency_limites();
-        // });
+        pool.enqueue_task([this]() {
+            set_currency_limites();
+        });
 
-        // pool.enqueue_task([this]() {
-        //     check_limit_values_by_interval(CHECK_CURRENCIES_LIMIT_INTERVAL);
-        // });
+        pool.enqueue_task([this]() {
+            check_limit_values_by_interval(CHECK_CURRENCIES_LIMIT_INTERVAL);
+        });
 
         pool.enqueue_task([this]() {
             publish_news_by_interval(PUBLISH_NEWS_INTERVAL);
@@ -130,7 +128,7 @@ void Bot::on_callback_query(TgBot::CallbackQuery::Ptr callback_query) {
 
         std::string currencies_string = utils::stringify_strings_vector_to_string(crypto_keys_vector, ",");
         std::string url = "https://api.coingecko.com/api/v3/simple/price?ids=" + currencies_string + "&vs_currencies=usd";
-        nlohmann::json result = crypto_fetcher.fetch_coingecko(url);
+        nlohmann::json result = http_client.fetch_json(url);
         std::string answer = "📈 Актуальный курс\nведущих криптовалют: \n";
 
         if (!result.empty()) {
@@ -196,7 +194,7 @@ void Bot::set_currency_limites() {
     for (const auto& [currency_name, symbol] : crypto_map) {
         try {
             std::string url = fmt::format("https://api.coingecko.com/api/v3/coins/{}/market_chart?vs_currency=usd&days=7", currency_name);
-            nlohmann::json result = crypto_fetcher.fetch_coingecko(url);
+            nlohmann::json result = http_client.fetch_json(url);
 
             std::vector<double> min_max_values = utils::find_currency_min_max(result["prices"]);
             limites[currency_name] = min_max_values;
@@ -221,7 +219,7 @@ void Bot::check_limit_values_by_interval(const unsigned int seconds) {
     std::string url = "https://api.coingecko.com/api/v3/simple/price?ids=" + currencies_string + "&vs_currencies=usd";
 
     while (true) {
-        nlohmann::json result = crypto_fetcher.fetch_coingecko(url);
+        nlohmann::json result = http_client.fetch_json(url);
 
         if (!result.empty()) {
             try {
@@ -256,7 +254,7 @@ void Bot::publish_news_by_interval(const unsigned int seconds) {
     std::string url = "https://newsdata.io/api/1/latest?apikey=" + NEWS_API_KEY + "&q=криптовалюта&language=ru&size=1";
 
     while (true) {
-        nlohmann::json result = news_fetcher.fetch_news(url);
+        nlohmann::json result = http_client.fetch_json(url);
 
         try {
             nlohmann::json article = result["results"][0];

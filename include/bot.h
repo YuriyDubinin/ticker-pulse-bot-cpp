@@ -7,8 +7,7 @@
 #include <string>
 #include <vector>
 #include "thread_pool.h"
-#include "crypto_fetcher.h"
-#include "news_fetcher.h"
+#include "http_client.h"
 
 
 class Bot {
@@ -20,8 +19,7 @@ class Bot {
         static std::map<std::string, std::string> crypto_map;
         TgBot::Bot bot;
         ThreadPool pool;
-        CryptoFetcher crypto_fetcher;
-        NewsFetcher news_fetcher;
+        HTTPClient http_client;
         std::map<std::string, std::vector<double>> limites;
         TgBot::InlineKeyboardMarkup::Ptr create_main_keyboard();
         void on_start_command(TgBot::Message::Ptr message);
