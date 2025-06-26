@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
+cmake_policy(SET CMP0074 NEW)
 
 set(CMAKE_TOOLCHAIN_FILE "${CMAKE_SOURCE_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake"
     CACHE STRING "Vcpkg toolchain file")
@@ -18,6 +19,9 @@ else()
 endif()
 
 # Пути для vcpkg
+set(PostgreSQL_ROOT "${CMAKE_SOURCE_DIR}/vcpkg/installed/${VCPKG_TARGET_TRIPLET}")
+set(PostgreSQL_INCLUDE_DIR "${PostgreSQL_ROOT}/include")
+set(PostgreSQL_LIBRARY "${PostgreSQL_ROOT}/lib/libpq.dylib")
 set(VCPKG_INSTALLED_PATH "${CMAKE_SOURCE_DIR}/vcpkg/installed/${VCPKG_TARGET_TRIPLET}")
 list(APPEND CMAKE_PREFIX_PATH "${VCPKG_INSTALLED_PATH}/share")
 
@@ -27,6 +31,7 @@ find_package(ZLIB REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(nlohmann_json REQUIRED)
 find_package(CURL REQUIRED)
+find_package(PostgreSQL REQUIRED)
 
 # Поиск tgbot-cpp как библиотеку вручную
 find_library(TGBOT_CPP_LIB
@@ -71,5 +76,6 @@ target_link_libraries(TickerPulseBot
     OpenSSL::Crypto
     nlohmann_json::nlohmann_json
     CURL::libcurl
+    PostgreSQL::PostgreSQL
     ${TGBOT_CPP_LIB}
 )
