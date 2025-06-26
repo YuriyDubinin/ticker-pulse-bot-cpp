@@ -50,6 +50,7 @@ include_directories(
 
 # Исходные файлы
 add_executable(TickerPulseBot
+    config/global_config.cpp 
     src/main.cpp
     src/thread_pool.cpp
     src/bot.cpp
