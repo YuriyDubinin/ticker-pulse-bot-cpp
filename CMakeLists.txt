@@ -19,9 +19,6 @@ else()
 endif()
 
 # Пути для vcpkg
-set(PostgreSQL_ROOT "${CMAKE_SOURCE_DIR}/vcpkg/installed/${VCPKG_TARGET_TRIPLET}")
-set(PostgreSQL_INCLUDE_DIR "${PostgreSQL_ROOT}/include")
-set(PostgreSQL_LIBRARY "${PostgreSQL_ROOT}/lib/libpq.dylib")
 set(VCPKG_INSTALLED_PATH "${CMAKE_SOURCE_DIR}/vcpkg/installed/${VCPKG_TARGET_TRIPLET}")
 list(APPEND CMAKE_PREFIX_PATH "${VCPKG_INSTALLED_PATH}/share")
 
