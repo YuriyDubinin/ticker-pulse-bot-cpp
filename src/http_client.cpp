@@ -1,58 +1,57 @@
-#include <fmt/core.h>
-#include <curl/curl.h>
-#include <nlohmann/json.hpp>
 #include "http_client.h"
+#include <curl/curl.h>
+#include <fmt/core.h>
+#include <nlohmann/json.hpp>
 
 HTTPClient::HTTPClient() {
-    curl_global_init(CURL_GLOBAL_DEFAULT);  // Инициализация глобального состояния CURL
+  curl_global_init(CURL_GLOBAL_DEFAULT); // Инициализация глобального состояния CURL
 }
 
 HTTPClient::~HTTPClient() {
-    curl_global_cleanup();  // Очистка глобального состояния CURL
+  curl_global_cleanup(); // Очистка глобального состояния CURL
 }
 
 size_t HTTPClient::write_callback(void* contents, size_t size, size_t nmemb, void* userp) {
-    // Функция вызывающаяся каждый раз, когда CURL получает данные
-    ((std::string*)userp)->append((char*)contents, size * nmemb);
-    return size * nmemb;
+  // Функция вызывающаяся каждый раз, когда CURL получает данные
+  ((std::string*)userp)->append((char*)contents, size * nmemb);
+  return size * nmemb;
 }
 
-
 nlohmann::json HTTPClient::fetch_json(const std::string& url) {
-    CURL* curl;
-    CURLcode res;
-    std::string readBuffer;
+  CURL*       curl;
+  CURLcode    res;
+  std::string readBuffer;
 
-    // Инициализация CURL
-    curl = curl_easy_init();
-    
-    if (curl) {
-        // Установка URL и других параметров CURL
-        curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
+  // Инициализация CURL
+  curl = curl_easy_init();
 
-        // Выполнение запроса
-        res = curl_easy_perform(curl);
+  if (curl) {
+    // Установка URL и других параметров CURL
+    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
 
-        // Проверка на ошибки
-        if (res != CURLE_OK) {
-            fmt::print("[CRYPTO_FETCHER]: cURL error: {}\n", curl_easy_strerror(res));
-        }
+    // Выполнение запроса
+    res = curl_easy_perform(curl);
 
-        // Очистка CURL
-        curl_easy_cleanup(curl);
+    // Проверка на ошибки
+    if (res != CURLE_OK) {
+      fmt::print("[CRYPTO_FETCHER]: cURL error: {}\n", curl_easy_strerror(res));
     }
 
-    // Парс JSON
-    if (!readBuffer.empty()) {
-        try {
-            return nlohmann::json::parse(readBuffer);
-        } catch (const nlohmann::json::exception& e) {
-            fmt::print("[CRYPTO_FETCHER]: JSON parsing error: {}\n", e.what());
-        }
-    }
+    // Очистка CURL
+    curl_easy_cleanup(curl);
+  }
 
-    // Пустой JSON в случае ошибки
-    return nlohmann::json();
+  // Парс JSON
+  if (!readBuffer.empty()) {
+    try {
+      return nlohmann::json::parse(readBuffer);
+    } catch (const nlohmann::json::exception& e) {
+      fmt::print("[CRYPTO_FETCHER]: JSON parsing error: {}\n", e.what());
+    }
+  }
+
+  // Пустой JSON в случае ошибки
+  return nlohmann::json();
 }
