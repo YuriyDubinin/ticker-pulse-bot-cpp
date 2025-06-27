@@ -68,9 +68,6 @@ target_include_directories(TickerPulseBot
 target_link_libraries(TickerPulseBot
     PRIVATE
     fmt::fmt
-    ZLIB::ZLIB
-    OpenSSL::SSL
-    OpenSSL::Crypto
     nlohmann_json::nlohmann_json
     CURL::libcurl
     PostgreSQL::PostgreSQL

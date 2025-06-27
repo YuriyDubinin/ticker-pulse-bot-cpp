@@ -70,7 +70,7 @@ These dependencies will be automatically installed via **vcpkg** during the setu
    - Install the necessary libraries via vcpkg:
      ```bash
      cd vcpkg
-     ./vcpkg install fmt zlib openssl nlohmann-json tgbot-cpp
+     ./vcpkg install fmt zlib openssl nlohmann-json tgbot-cpp libpq
      ```
 
 6. **Prepare the config directory**:
