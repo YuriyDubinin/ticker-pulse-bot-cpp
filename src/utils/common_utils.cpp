@@ -1,10 +1,10 @@
-#include "common.h"
+#include "common_utils.h"
 #include <iomanip>
 #include <sstream>
 #include <string>
 #include <vector>
 
-namespace common {
+namespace common_utils {
   std::string to_fixed_double(double value, int precision) {
     std::ostringstream oss;
     oss << std::fixed << std::setprecision(precision) << value;
@@ -56,4 +56,4 @@ namespace common {
 
     return {minVal, maxVal};
   };
-}; // namespace utils
+}; // namespace common_utils
