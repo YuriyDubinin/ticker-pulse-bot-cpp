@@ -7,7 +7,7 @@
 #include "global_config.h"
 #include "http_client.h"
 #include "thread_pool.h"
-#include "utils.h"
+#include "common.h"
 
 Bot::Bot(const std::string& token, int threads_count) : bot(token), pool(threads_count), http_client() {};
 
@@ -118,7 +118,7 @@ void Bot::on_callback_query(TgBot::CallbackQuery::Ptr callback_query) {
       crypto_keys_vector.push_back(pair.first);
     };
 
-    std::string currencies_string = utils::stringify_strings_vector_to_string(crypto_keys_vector, ",");
+    std::string currencies_string = common::stringify_strings_vector_to_string(crypto_keys_vector, ",");
     std::string url = "https://api.coingecko.com/api/v3/simple/price?ids=" + currencies_string + "&vs_currencies=usd";
     nlohmann::json result = http_client.fetch_json(url);
     std::string    answer = "📈 Актуальный курс\nведущих криптовалют: \n";
@@ -127,7 +127,7 @@ void Bot::on_callback_query(TgBot::CallbackQuery::Ptr callback_query) {
       try {
         for (const auto& [key, value] : result.items()) {
           double usdValue = value.at("usd");
-          answer          = answer + fmt::format("\n {}: {} $", crypto_map[key], utils::to_fixed_double(usdValue, 2));
+          answer          = answer + fmt::format("\n {}: {} $", crypto_map[key], common::to_fixed_double(usdValue, 2));
         };
 
         bot.getApi().sendMessage(callback_query->message->chat->id, answer);
@@ -188,7 +188,7 @@ void Bot::set_currency_limites() {
           fmt::format("https://api.coingecko.com/api/v3/coins/{}/market_chart?vs_currency=usd&days=7", currency_name);
       nlohmann::json result = http_client.fetch_json(url);
 
-      std::vector<double> min_max_values = utils::find_currency_min_max(result["prices"]);
+      std::vector<double> min_max_values = common::find_currency_min_max(result["prices"]);
       limites[currency_name]             = min_max_values;
 
       fmt::print("[TICKER_PULSE_BOT]: {}, min: {}, max: {}\n", currency_name, min_max_values[0], min_max_values[1]);
@@ -208,7 +208,7 @@ void Bot::check_limit_values_by_interval(const unsigned int seconds) {
     crypto_keys_vector.push_back(pair.first);
   };
 
-  std::string currencies_string = utils::stringify_strings_vector_to_string(crypto_keys_vector, ",");
+  std::string currencies_string = common::stringify_strings_vector_to_string(crypto_keys_vector, ",");
   std::string url = "https://api.coingecko.com/api/v3/simple/price?ids=" + currencies_string + "&vs_currencies=usd";
 
   while (true) {
@@ -226,14 +226,14 @@ void Bot::check_limit_values_by_interval(const unsigned int seconds) {
             if (usdValue < min) {
               message =
                   fmt::format("⬇️ {} {}: {} $, это ниже минимальной цены за последние 7 дней! ({} $)", key,
-                              crypto_map[key], utils::to_fixed_double(usdValue, 2), utils::to_fixed_double(min, 2));
+                              crypto_map[key], common::to_fixed_double(usdValue, 2), common::to_fixed_double(min, 2));
               send_to_group(TELEGRAM_GROUP_ID, message);
             }
 
             if (usdValue > max) {
               message =
                   fmt::format("⬆️ {} {}: {} $, это выше максимальной цены за последние 7 дней! ({} $)", key,
-                              crypto_map[key], utils::to_fixed_double(usdValue, 2), utils::to_fixed_double(max, 2));
+                              crypto_map[key], common::to_fixed_double(usdValue, 2), common::to_fixed_double(max, 2));
               send_to_group(TELEGRAM_GROUP_ID, message);
             }
           }

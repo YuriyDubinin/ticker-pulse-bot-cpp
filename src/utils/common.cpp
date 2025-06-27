@@ -1,10 +1,10 @@
-#include "utils.h"
+#include "common.h"
 #include <iomanip>
 #include <sstream>
 #include <string>
 #include <vector>
 
-namespace utils {
+namespace common {
   std::string to_fixed_double(double value, int precision) {
     std::ostringstream oss;
     oss << std::fixed << std::setprecision(precision) << value;

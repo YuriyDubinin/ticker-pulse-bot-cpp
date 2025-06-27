@@ -43,6 +43,10 @@ endif()
 # Поиск исходников
 file(GLOB SRC_SOURCES
     src/*.cpp
+    src/db/*.cpp
+    src/models/*.cpp
+    src/services/*.cpp
+    src/utils/*.cpp
 )
 
 file(GLOB CONFIG_SOURCES
@@ -60,8 +64,12 @@ add_executable(TickerPulseBot ${ALL_SOURCES})
 target_include_directories(TickerPulseBot
     PRIVATE
     "${CMAKE_SOURCE_DIR}/src"
-    "${CMAKE_SOURCE_DIR}/include"
     "${CMAKE_SOURCE_DIR}/config"
+    "${CMAKE_SOURCE_DIR}/include"
+    "${CMAKE_SOURCE_DIR}/include/db"
+    "${CMAKE_SOURCE_DIR}/include/models"
+    "${CMAKE_SOURCE_DIR}/include/services"
+    "${CMAKE_SOURCE_DIR}/include/utils"
 )
 
 # Линковка библиотек

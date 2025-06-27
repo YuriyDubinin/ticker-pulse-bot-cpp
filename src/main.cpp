@@ -27,7 +27,7 @@ int main() {
 
   fmt::print("\n[ПОСЛЕДНЯЯ НОВОСТЬ]:\nID: {}\nЗаголовок: {}\n\n", id, title);
 
-  // bot.start();
+  bot.start();
 
   return 0;
 };
