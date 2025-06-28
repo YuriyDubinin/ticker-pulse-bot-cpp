@@ -12,15 +12,15 @@ class PostgresConnection {
     PostgresConnection(const PostgresConnection&)            = delete;
     PostgresConnection& operator=(const PostgresConnection&) = delete;
 
-    bool      isConnected() const;
-    PGresult* executeQuery(const std::string& query);
-    void      clearResult(PGresult* result);
+    bool      is_connected() const;
+    PGresult* execute_query(const std::string& query);
+    void      clear_result(PGresult* result);
     void      close();
 
     PGconn* raw(); // Доступ к PGconn* при необходимости
 
-    bool      prepareStatement(const std::string& stmtName, const std::string& query);
-    PGresult* execPrepared(const std::string& stmtName, int nParams, const char* const* paramValues);
+    bool      prepare_statement(const std::string& stmtName, const std::string& query);
+    PGresult* execute_prepared_statement(const std::string& stmtName, int nParams, const char* const* paramValues);
 
   private:
     PGconn* conn;

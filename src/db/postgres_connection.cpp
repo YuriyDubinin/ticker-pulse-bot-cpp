@@ -14,12 +14,12 @@ PostgresConnection::~PostgresConnection() {
   close();
 }
 
-bool PostgresConnection::isConnected() const {
+bool PostgresConnection::is_connected() const {
   return conn && PQstatus(conn) == CONNECTION_OK;
 }
 
-PGresult* PostgresConnection::executeQuery(const std::string& query) {
-  if (!isConnected())
+PGresult* PostgresConnection::execute_query(const std::string& query) {
+  if (!is_connected())
     return nullptr;
   PGresult* result = PQexec(conn, query.c_str());
 
@@ -32,7 +32,7 @@ PGresult* PostgresConnection::executeQuery(const std::string& query) {
   return result;
 }
 
-void PostgresConnection::clearResult(PGresult* result) {
+void PostgresConnection::clear_result(PGresult* result) {
   if (result) {
     PQclear(result);
   }
@@ -50,8 +50,8 @@ PGconn* PostgresConnection::raw() {
 }
 
 // Подготовить запрос
-bool PostgresConnection::prepareStatement(const std::string& stmtName, const std::string& query) {
-  if (!isConnected())
+bool PostgresConnection::prepare_statement(const std::string& stmtName, const std::string& query) {
+  if (!is_connected())
     return false;
   PGresult* res = PQprepare(conn, stmtName.c_str(), query.c_str(), 0, nullptr);
   if (PQresultStatus(res) != PGRES_COMMAND_OK) {
@@ -64,8 +64,10 @@ bool PostgresConnection::prepareStatement(const std::string& stmtName, const std
 }
 
 // Выполнить подготовленный запрос
-PGresult* PostgresConnection::execPrepared(const std::string& stmtName, int nParams, const char* const* paramValues) {
-  if (!isConnected())
+PGresult* PostgresConnection::execute_prepared_statement(const std::string& stmtName,
+                                                         int                nParams,
+                                                         const char* const* paramValues) {
+  if (!is_connected())
     return nullptr;
   PGresult* res = PQexecPrepared(conn, stmtName.c_str(), nParams, paramValues, nullptr, nullptr, 0);
   if (PQresultStatus(res) != PGRES_TUPLES_OK && PQresultStatus(res) != PGRES_COMMAND_OK) {
