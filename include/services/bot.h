@@ -15,7 +15,6 @@ class Bot {
     void start();
 
   private:
-    static std::map<std::string, std::string>  crypto_map;
     TgBot::Bot                                 bot;
     ThreadPool                                 pool;
     HTTPClient                                 http_client;
@@ -23,10 +22,7 @@ class Bot {
     TgBot::InlineKeyboardMarkup::Ptr           create_main_keyboard();
     void                                       on_start_command(TgBot::Message::Ptr message);
     void                                       on_any_message(TgBot::Message::Ptr message);
-    void send_to_group(const std::string& group_id, const std::string& message_text);
-    void on_callback_query(TgBot::CallbackQuery::Ptr callback_query);
-    void set_currency_limites();
-    void check_limit_values_by_interval(const unsigned int seconds);
+    void send_message_to_group(const std::string& group_id, const std::string& message_text);
     void publish_news_by_interval(const unsigned int seconts);
 };
 
