@@ -19,6 +19,9 @@ class PostgresConnection {
 
     PGconn* raw(); // Доступ к PGconn* при необходимости
 
+    bool      prepareStatement(const std::string& stmtName, const std::string& query);
+    PGresult* execPrepared(const std::string& stmtName, int nParams, const char* const* paramValues);
+
   private:
     PGconn* conn;
 };

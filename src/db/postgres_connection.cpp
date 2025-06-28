@@ -48,3 +48,30 @@ void PostgresConnection::close() {
 PGconn* PostgresConnection::raw() {
   return conn;
 }
+
+// Подготовить запрос
+bool PostgresConnection::prepareStatement(const std::string& stmtName, const std::string& query) {
+  if (!isConnected())
+    return false;
+  PGresult* res = PQprepare(conn, stmtName.c_str(), query.c_str(), 0, nullptr);
+  if (PQresultStatus(res) != PGRES_COMMAND_OK) {
+    fmt::print(stderr, "[POSTGRESS_CONNECTION]: Prepare failed: {}\n", PQerrorMessage(conn));
+    PQclear(res);
+    return false;
+  }
+  PQclear(res);
+  return true;
+}
+
+// Выполнить подготовленный запрос
+PGresult* PostgresConnection::execPrepared(const std::string& stmtName, int nParams, const char* const* paramValues) {
+  if (!isConnected())
+    return nullptr;
+  PGresult* res = PQexecPrepared(conn, stmtName.c_str(), nParams, paramValues, nullptr, nullptr, 0);
+  if (PQresultStatus(res) != PGRES_TUPLES_OK && PQresultStatus(res) != PGRES_COMMAND_OK) {
+    fmt::print(stderr, "[POSTGRESS_CONNECTION]: ExecPrepared failed: {}\n", PQerrorMessage(conn));
+    PQclear(res);
+    return nullptr;
+  }
+  return res;
+}
