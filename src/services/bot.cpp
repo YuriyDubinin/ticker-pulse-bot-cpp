@@ -4,10 +4,10 @@
 #include <string>
 #include <thread>
 #include <vector>
+#include "common_utils.h"
 #include "global_config.h"
 #include "http_client.h"
 #include "thread_pool.h"
-#include "common_utils.h"
 
 Bot::Bot(const std::string& token, int threads_count) : bot(token), pool(threads_count), http_client() {};
 
@@ -127,7 +127,7 @@ void Bot::on_callback_query(TgBot::CallbackQuery::Ptr callback_query) {
       try {
         for (const auto& [key, value] : result.items()) {
           double usdValue = value.at("usd");
-          answer          = answer + fmt::format("\n {}: {} $", crypto_map[key], common_utils::to_fixed_double(usdValue, 2));
+          answer = answer + fmt::format("\n {}: {} $", crypto_map[key], common_utils::to_fixed_double(usdValue, 2));
         };
 
         bot.getApi().sendMessage(callback_query->message->chat->id, answer);
@@ -224,16 +224,16 @@ void Bot::check_limit_values_by_interval(const unsigned int seconds) {
             const double& max      = limites[key][1];
 
             if (usdValue < min) {
-              message =
-                  fmt::format("⬇️ {} {}: {} $, это ниже минимальной цены за последние 7 дней! ({} $)", key,
-                              crypto_map[key], common_utils::to_fixed_double(usdValue, 2), common_utils::to_fixed_double(min, 2));
+              message = fmt::format("⬇️ {} {}: {} $, это ниже минимальной цены за последние 7 дней! ({} $)", key,
+                                    crypto_map[key], common_utils::to_fixed_double(usdValue, 2),
+                                    common_utils::to_fixed_double(min, 2));
               send_to_group(TELEGRAM_GROUP_ID, message);
             }
 
             if (usdValue > max) {
-              message =
-                  fmt::format("⬆️ {} {}: {} $, это выше максимальной цены за последние 7 дней! ({} $)", key,
-                              crypto_map[key], common_utils::to_fixed_double(usdValue, 2), common_utils::to_fixed_double(max, 2));
+              message = fmt::format("⬆️ {} {}: {} $, это выше максимальной цены за последние 7 дней! ({} $)", key,
+                                    crypto_map[key], common_utils::to_fixed_double(usdValue, 2),
+                                    common_utils::to_fixed_double(max, 2));
               send_to_group(TELEGRAM_GROUP_ID, message);
             }
           }

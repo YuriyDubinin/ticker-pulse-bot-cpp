@@ -45,6 +45,7 @@ file(GLOB SRC_SOURCES
     src/*.cpp
     src/db/*.cpp
     src/models/*.cpp
+    src/dao/*.cpp
     src/services/*.cpp
     src/utils/*.cpp
 )
@@ -68,6 +69,7 @@ target_include_directories(TickerPulseBot
     "${CMAKE_SOURCE_DIR}/include"
     "${CMAKE_SOURCE_DIR}/include/db"
     "${CMAKE_SOURCE_DIR}/include/models"
+    "${CMAKE_SOURCE_DIR}/include/dao"
     "${CMAKE_SOURCE_DIR}/include/services"
     "${CMAKE_SOURCE_DIR}/include/utils"
 )
