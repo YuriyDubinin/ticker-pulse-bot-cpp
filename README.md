@@ -1,13 +1,10 @@
-# ticker-pulse-bot-cpp v.1.0.3
+# ticker-pulse-bot-cpp v.1.0.4
 
 **ticker-pulse-bot** is a Telegram bot designed for monitoring cryptocurrency markets. The bot helps track specific cryptocurrencies and signals when predefined threshold values (minimums and maximums) are reached. It also provides real-time information about cryptocurrencies and their prices. This solution is perfect for anyone who wants to stay updated on the crypto market and receive notifications about significant changes.
 
 ## Features
 
-- **Cryptocurrency Monitoring**: The bot tracks the current prices of cryptocurrencies and compares them against predefined thresholds.
-- **Alerts**: If a cryptocurrency's price reaches a set minimum or maximum, the bot sends a notification to a Telegram channel or individual chat.
-- **Daily Updates**: The bot collects data on cryptocurrencies daily, including their highest and lowest values for the past month.
-- **Information Retrieval**: Users can request real-time cryptocurrency data via bot commands.
+- **Economic News Publishing**: The bot publishes the latest and most relevant economic news automatically.
 
 ## Capabilities
 

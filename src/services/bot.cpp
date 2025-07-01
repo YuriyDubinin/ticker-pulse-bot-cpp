@@ -9,7 +9,8 @@
 #include "http_client.h"
 #include "thread_pool.h"
 
-Bot::Bot(const std::string& token, int threads_count) : bot(token), pool(threads_count), http_client() {};
+Bot::Bot(const std::string& token, int threads_count, const std::string& db_connection_info)
+    : bot(token), pool(threads_count), http_client(), db(db_connection_info), newsDAO(db) {};
 
 void Bot::start() {
   // Обработка команды /start
@@ -41,8 +42,8 @@ void Bot::start() {
   // });
 
   try {
-    const std::string start_chat_message = "🚀 Ticker Pulse Bot запущен..";
-    send_message_to_group(TELEGRAM_GROUP_ID, start_chat_message);
+    // const std::string start_chat_message = "🚀 Ticker Pulse Bot запущен..";
+    // send_message_to_group(TELEGRAM_GROUP_ID, start_chat_message);
 
     fmt::print("[TICKER_PULSE_BOT]: TG username - {}\n", bot.getApi().getMe()->username);
 
@@ -114,22 +115,22 @@ TgBot::InlineKeyboardMarkup::Ptr Bot::create_main_keyboard() {
 };
 
 void Bot::publish_news_by_interval(const unsigned int seconds) {
-  std::string url = "https://newsdata.io/api/1/latest?apikey=" + NEWS_API_KEY + "&q=криптовалюта&language=ru&size=1";
-
   while (true) {
-    nlohmann::json result = http_client.fetch_json(url);
+    auto news_opt = newsDAO.get_latest_unpublished();
 
-    try {
-      nlohmann::json article = result["results"][0];
+    if (news_opt.has_value()) {
+      News        news         = news_opt.value();
+      std::string message_text = fmt::format("{}.\nПодробнее: {}", news.title, news.link.value_or(""));
 
-      std::string title       = article.value("title", "Без заголовка");
-      std::string description = article.value("description", "Нет описания");
-      std::string link        = article.value("link", "Нет ссылки");
-      std::string message     = fmt::format("{}.\n{} @ticker_pulse\n\n🔗{}", title, description, link);
+      send_message_to_group(TELEGRAM_GROUP_ID, message_text);
 
-      send_message_to_group(TELEGRAM_GROUP_ID, message);
-    } catch (const std::exception& e) {
-      fmt::print("[TICKER_PULSE_BOT]: [publish_news_by_interval]: Error sending message to group: {}\n", e.what());
+      news.published = true;
+
+      if (newsDAO.update(news)) {
+        // fmt::print("[TICKER_PULSE_BOT]: News with id {} marked as published.\n", news.id);
+      } else {
+        // fmt::print("[TICKER_PULSE_BOT]: Failed to update news with id {}.\n", news.id);
+      }
     }
 
     std::this_thread::sleep_for(std::chrono::seconds(seconds));
