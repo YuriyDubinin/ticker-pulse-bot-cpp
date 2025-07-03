@@ -7,6 +7,9 @@ RUN apt-get update && apt-get install -y \
     curl \
     git \
     cmake \
+    zip \
+    unzip \
+    tar \
     ninja-build \
     pkg-config \
     libssl-dev \
