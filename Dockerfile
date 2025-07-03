@@ -13,8 +13,15 @@ RUN apt-get update && apt-get install -y \
     ninja-build \
     pkg-config \
     libssl-dev \
-    ca-certificates && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
+    ca-certificates \
+    linux-libc-dev \
+    autoconf \
+    automake \
+    libtool \
+    bison \
+    flex \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
 
 WORKDIR /app
 
@@ -28,7 +35,7 @@ WORKDIR /app
 COPY . .
 
 # Установка зависимостей с помощью vcpkg
-RUN /app/vcpkg/vcpkg install fmt zlib openssl nlohmann-json curl tgbot-cpp
+RUN /app/vcpkg/vcpkg install fmt zlib openssl nlohmann-json curl tgbot-cpp libpq
 
 # Собираем проект
 WORKDIR /app/build
