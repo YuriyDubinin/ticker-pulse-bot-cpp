@@ -120,7 +120,7 @@ void Bot::publish_news_by_interval(const unsigned int seconds) {
 
     if (news_opt.has_value()) {
       News        news         = news_opt.value();
-      std::string message_text = fmt::format("{}.\nПодробнее: {}", news.title, news.link.value_or(""));
+      std::string message_text = fmt::format("{}. @ticker_pulse\n🔗 Подробнее: {}", news.title, news.link.value_or(""));
 
       send_message_to_group(TELEGRAM_GROUP_ID, message_text);
 
