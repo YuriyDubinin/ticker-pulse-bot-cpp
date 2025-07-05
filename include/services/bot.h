@@ -26,7 +26,7 @@ class Bot {
     void                             on_start_command(TgBot::Message::Ptr message);
     void                             on_any_message(TgBot::Message::Ptr message);
     void send_message_to_group(const std::string& group_id, const std::string& message_text);
-    void publish_news_by_interval(const unsigned int seconts);
+    void publish_news_by_interval(const unsigned int minutes);
 };
 
 #endif

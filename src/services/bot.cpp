@@ -114,7 +114,7 @@ TgBot::InlineKeyboardMarkup::Ptr Bot::create_main_keyboard() {
   return keyboard;
 };
 
-void Bot::publish_news_by_interval(const unsigned int seconds) {
+void Bot::publish_news_by_interval(const unsigned int minutes) {
   while (true) {
     auto news_opt = newsDAO.get_latest_unpublished();
 
@@ -133,6 +133,6 @@ void Bot::publish_news_by_interval(const unsigned int seconds) {
       }
     }
 
-    std::this_thread::sleep_for(std::chrono::seconds(seconds));
+    std::this_thread::sleep_for(std::chrono::minutes(minutes));
   }
 }
